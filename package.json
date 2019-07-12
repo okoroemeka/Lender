@@ -7,7 +7,12 @@
   "license": "MIT",
   "scripts": {
     "watch-ts": "tsc -w",
+    "test": "export NODE_ENV=test && jest -i",
     "watch-node": "nodemon dist/app.js"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
   },
   "dependencies": {
     "@types/express": "^4.17.0",
@@ -17,6 +22,11 @@
     "mongoose": "^5.6.4"
   },
   "devDependencies": {
-    "nodemon": "^1.19.1"
+    "@types/jest": "^24.0.15",
+    "@types/supertest": "^2.0.8",
+    "jest": "^24.8.0",
+    "nodemon": "^1.19.1",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.5.3"
   }
 }
