@@ -3,3 +3,4 @@ describe('setup test', () => {
     expect(true).toBe(true);
   });
 });
+console.log('NODE_ENV', process.env.NODE_ENV);
