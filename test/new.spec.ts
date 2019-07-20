@@ -1,44 +1,64 @@
 import * as request from 'supertest';
 import app from '../src/app';
 import { User } from '../src/Schema/schema';
+import { testData } from './testData';
 
 let appRequest: request.SuperTest<request.Test>;
 
-describe('setup test', () => {
-  beforeAll(() => {
-    User.deleteMany({}, error => console.log(error));
-    appRequest = request(app);
-  });
+// beforeAll(() => {
+//   User.deleteMany({}, error => console.log(error));
+//   appRequest = request(app);
+// });
+beforeAll(() => {
+  User.deleteMany({}, error => console.log(error));
+  appRequest = request(app);
+});
 
-  it('should return 200 for user signup', async () => {
-    const res = await appRequest
-      .post('/api/v1/auth/signup')
-      .send({
-        lastName: 'nnaemeka',
-        firstName: 'okoro',
-        email: 'mekarw056@gmail.com',
-        password: 'wise2424',
-        address: '1 aminu'
-      })
-      .set('Accept', 'application/json');
-    console.log(res.body);
-    expect(res.status).toBe(200);
-    expect(res.body.status).toEqual('Success');
+describe('Authentication test', () => {
+  describe('User signup', () => {
+    it('should return 200 for user signup', async () => {
+      const res = await appRequest
+        .post('/api/v1/auth/signup')
+        .send(testData.signupUserSuccess)
+        .set('Accept', 'application/json');
+      expect(res.status).toBe(201);
+      expect(res.body.status).toEqual('Success');
+    });
+    it('should return 409 for an already existing user', async () => {
+      const res = await appRequest
+        .post('/api/v1/auth/signup')
+        .send(testData.signupExistingUser)
+        .set('Accept', 'application/json');
+      expect(res.status).toBe(409);
+      expect(res.body.status).toEqual('Fail');
+    });
   });
-  it('should return 409 for an already existing user', async () => {
-    const res = await appRequest
-      .post('/api/v1/auth/signup')
-      .send({
-        lastName: 'nnaemeka',
-        firstName: 'okoro',
-        email: 'mekarw056@gmail.com',
-        password: 'wise2424',
-        address: '1 aminu'
-      })
-      .set('Accept', 'application/json');
-
-    expect(res.status).toBe(409);
-    expect(res.body.status).toEqual('Fail');
+  describe('user signin', () => {
+    it('should successfully signin user', async () => {
+      const res = await appRequest
+        .post('/api/v1/auth/signin')
+        .send(testData.signinUserSuccess)
+        .set('Accept', 'application/json');
+      expect(res.status).toBe(200);
+      expect(res.body.status).toEqual('Success');
+      expect(typeof res.body.data.token).toBe('string');
+    });
+    it('should return error for non existing', async () => {
+      const res = await appRequest
+        .post('/api/v1/auth/signin')
+        .send(testData.signinNonUser)
+        .set('Accept', 'application/json');
+      expect(res.status).toBe(404);
+      expect(res.body.status).toEqual('Fail');
+    });
+    it('should return error for wrong password', async () => {
+      const res = await appRequest
+        .post('/api/v1/auth/signin')
+        .send(testData.signinUserWrongPassword)
+        .set('Accept', 'application/json');
+      expect(res.status).toBe(400);
+      expect(res.body.status).toEqual('Fail');
+      expect(res.body.message).toEqual('Wrong email or password');
+    });
   });
 });
-console.log('NODE_ENV', process.env.NODE_ENV);

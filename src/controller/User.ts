@@ -1,7 +1,10 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
 import { User } from '../Schema/schema';
+import responseHelper from '../utils/responseHelper';
+import { createToken } from '../utils/tokenHelper';
+
+const { SECRETE_KEY } = process.env;
 
 /**
  * User authentication
@@ -20,32 +23,76 @@ class UserAuth {
   async userSignup(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
-      const { SECRETE_KEY } = process.env;
       const checkUser = await User.findOne({
         email: new RegExp(`${email}`, 'gi')
       });
       if (checkUser) {
-        return res.status(409).json({
-          status: 'Fail',
-          message: 'Email already exist'
-        });
+        return responseHelper(res, 409, 'Fail', 'Email already exist', false);
       }
       let hashPassword = await bcrypt.hash(password, 10);
       req.body.password = hashPassword;
       const { email: userEmail }: any = await User.create(req.body);
-      const token = jwt.sign({ data: email }, SECRETE_KEY, { expiresIn: '1h' });
-      return res.status(200).json({
-        status: 'Success',
-        email: userEmail,
-        token
-      });
+      const token = await createToken(
+        { data: email },
+        { expiresIn: '1h' },
+        SECRETE_KEY
+      );
+      return responseHelper(
+        res,
+        201,
+        'Success',
+        { email: userEmail, token },
+        true
+      );
     } catch (error) {
-      return res.status(500).json({
-        status: 'Error',
-        mesasage: 'Internal serer error, please try again later'
-      });
+      return responseHelper(
+        res,
+        500,
+        'Error',
+        'Internal serer error, please try again later',
+        false
+      );
     }
   }
+  signin = async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+      const response: any = await User.findOne({
+        email: new RegExp(`${email}`, 'gi')
+      });
+      if (!response) {
+        return responseHelper(
+          res,
+          404,
+          'Fail',
+          'Email does not exist, please signup',
+          false
+        );
+      }
+      const { email: userEmail, password: userPassowrd } = response;
+      if (!(await bcrypt.compare(password, userPassowrd))) {
+        return responseHelper(
+          res,
+          400,
+          'Fail',
+          'Wrong email or password',
+          false
+        );
+      }
+      return responseHelper(
+        res,
+        200,
+        'Success',
+        {
+          email: userEmail,
+          token: createToken({ data: email }, { expiresIn: '1h' }, SECRETE_KEY)
+        },
+        true
+      );
+    } catch (error) {
+      return responseHelper(res, 500, 'Error', error.message, false);
+    }
+  };
 }
 
 export default new UserAuth();
