@@ -1,22 +1,22 @@
 import * as request from 'supertest';
 import app from '../src/app';
-import { User } from '../src/Schema/schema';
+import { User, Loan } from '../src/Schema/schema';
 import { testData } from './testData';
 
 let appRequest: request.SuperTest<request.Test>;
+let token: string = '';
 
-// beforeAll(() => {
-//   User.deleteMany({}, error => console.log(error));
-//   appRequest = request(app);
-// });
-beforeAll(() => {
-  User.deleteMany({}, error => console.log(error));
+beforeAll(async () => {
+  await User.deleteMany({}, error => console.log(error));
+
   appRequest = request(app);
 });
-
+afterAll(async () => {
+  await User.deleteMany({}, error => console.log(error));
+});
 describe('Authentication test', () => {
   describe('User signup', () => {
-    it('should return 200 for user signup', async () => {
+    it('should return 201 for user signup', async () => {
       const res = await appRequest
         .post('/api/v1/auth/signup')
         .send(testData.signupUserSuccess)
@@ -39,6 +39,7 @@ describe('Authentication test', () => {
         .post('/api/v1/auth/signin')
         .send(testData.signinUserSuccess)
         .set('Accept', 'application/json');
+      token = res.body.data.token;
       expect(res.status).toBe(200);
       expect(res.body.status).toEqual('Success');
       expect(typeof res.body.data.token).toBe('string');
@@ -46,8 +47,7 @@ describe('Authentication test', () => {
     it('should return error for non existing', async () => {
       const res = await appRequest
         .post('/api/v1/auth/signin')
-        .send(testData.signinNonUser)
-        .set('Accept', 'application/json');
+        .send(testData.signinNonUser);
       expect(res.status).toBe(404);
       expect(res.body.status).toEqual('Fail');
     });

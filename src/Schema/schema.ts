@@ -24,11 +24,11 @@ mongoose.connect(uri, (error: any) => {
 console.log(process.env.NODE_ENV);
 const { Schema } = mongoose;
 const loansSchema = new Schema({
-  user_email: { type: String, required: true }, // user email
+  email: { type: String, ref: 'User', required: true }, // user email
   createdOn: { type: Date, required: true },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'approved'],
+    enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
   }, // pending, approved, approved
   repaid: { type: Boolean, default: false },
@@ -36,8 +36,8 @@ const loansSchema = new Schema({
   amount: { type: Number, required: true },
   paymentInstallment: { type: Number }, // monthly installment payment(amount + interest) / tenor
   balance: { type: Number },
-  interest: { type: Number },
-  _debtor: { type: Number, ref: 'User' }
+  interest: { type: Number }
+  // _debtor: { type: Number, ref: 'User' }
 });
 
 const userSchema = new Schema({
