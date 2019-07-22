@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import responseHelper from '../utils/responseHelper';
 
 interface arg {
   email: string;
@@ -45,6 +46,42 @@ export const checkInputFields = (
         emptyFields.length > 1 ? 'are' : 'is'
       } required.`
     });
+  }
+  return next();
+};
+
+export const checkLoanField = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { tenor, amount }: any = req.body;
+  if (!tenor || isNaN(tenor)) {
+    return responseHelper(
+      res,
+      400,
+      'Fail',
+      'The tenor field is required and must be a number',
+      false
+    );
+  }
+  if (tenor < 1 || tenor > 12) {
+    return responseHelper(
+      res,
+      400,
+      'Fail',
+      'tenor must be a number between 1 and 12',
+      false
+    );
+  }
+  if (!amount || isNaN(amount) || amount < 0) {
+    return responseHelper(
+      res,
+      400,
+      'Fail',
+      'The amount field is required and must be a number greater than 0',
+      false
+    );
   }
   return next();
 };

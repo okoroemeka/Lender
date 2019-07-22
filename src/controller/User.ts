@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../Schema/schema';
 import responseHelper from '../utils/responseHelper';
-import { createToken } from '../utils/tokenHelper';
+import Token from '../utils/tokenHelper';
 
 const { SECRETE_KEY } = process.env;
 
@@ -32,8 +32,8 @@ class UserAuth {
       let hashPassword = await bcrypt.hash(password, 10);
       req.body.password = hashPassword;
       const { email: userEmail }: any = await User.create(req.body);
-      const token = await createToken(
-        { data: email },
+      const token = await Token.createToken(
+        { email },
         { expiresIn: '1h' },
         SECRETE_KEY
       );
@@ -85,7 +85,7 @@ class UserAuth {
         'Success',
         {
           email: userEmail,
-          token: createToken({ data: email }, { expiresIn: '1h' }, SECRETE_KEY)
+          token: Token.createToken({ email }, { expiresIn: '1h' }, SECRETE_KEY)
         },
         true
       );

@@ -34,5 +34,10 @@ export const testData = {
   signinUserWrongPassword: {
     email: 'mekarw056@gmail.com',
     password: 'wise224'
+  },
+  loanData: {
+    amount: 200,
+    tenor: 3,
+    token: ''
   }
 };

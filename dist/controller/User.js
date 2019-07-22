@@ -33,7 +33,7 @@ class UserAuth {
                 }
                 return responseHelper_1.default(res, 200, 'Success', {
                     email: userEmail,
-                    token: tokenHelper_1.createToken({ data: email }, { expiresIn: '1h' }, SECRETE_KEY)
+                    token: tokenHelper_1.default.createToken({ email }, { expiresIn: '1h' }, SECRETE_KEY)
                 }, true);
             }
             catch (error) {
@@ -61,7 +61,7 @@ class UserAuth {
                 let hashPassword = yield bcrypt.hash(password, 10);
                 req.body.password = hashPassword;
                 const { email: userEmail } = yield schema_1.User.create(req.body);
-                const token = yield tokenHelper_1.createToken({ data: email }, { expiresIn: '1h' }, SECRETE_KEY);
+                const token = yield tokenHelper_1.default.createToken({ email }, { expiresIn: '1h' }, SECRETE_KEY);
                 return responseHelper_1.default(res, 201, 'Success', { email: userEmail, token }, true);
             }
             catch (error) {
