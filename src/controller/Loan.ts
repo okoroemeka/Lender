@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { Loan } from '../Schema/schema';
 import responseHelper from '../utils/responseHelper';
 
@@ -39,7 +39,9 @@ class Loans {
    */
   viewAllLoanApplication = async (req: Request, res: Response) => {
     try {
-      const { email, isAdmin } = req.body.userData;
+      const {
+        userData: { email, isAdmin }
+      } = req.body;
       const loanApplications: Array<object> = await Loan.find(
         isAdmin ? {} : { email: new RegExp(`${email}`, 'gi') }
       );
@@ -64,6 +66,36 @@ class Loans {
       );
     } catch (error) {
       return responseHelper(res, 500, 'Error', error.message, false);
+    }
+  };
+  getSpecificLoan = async (req: Request, res: Response) => {
+    try {
+      const {
+        userData: { isAdmin }
+      }: any = req.body;
+      const { id }: any = req.params;
+      if (!isAdmin) {
+        return responseHelper(
+          res,
+          401,
+          'Error',
+          'You are not allowed to view this loan application.',
+          false
+        );
+      }
+      const loan: object = await Loan.findById(id);
+      if (!loan) {
+        return responseHelper(res, 404, 'Error', 'loan not found', false);
+      }
+      return responseHelper(res, 200, 'Success', loan, true);
+    } catch (error) {
+      return responseHelper(
+        res,
+        500,
+        'Error',
+        'Internal server error, Please try again later',
+        false
+      );
     }
   };
 }

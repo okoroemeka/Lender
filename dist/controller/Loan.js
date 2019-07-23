@@ -41,7 +41,7 @@ class Loans {
          */
         this.viewAllLoanApplication = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { email, isAdmin } = req.body.userData;
+                const { userData: { email, isAdmin } } = req.body;
                 const loanApplications = yield schema_1.Loan.find(isAdmin ? {} : { email: new RegExp(`${email}`, 'gi') });
                 const responsePackage = {
                     statusCode: loanApplications.length ? 200 : 404,
@@ -57,6 +57,23 @@ class Loans {
             }
             catch (error) {
                 return responseHelper_1.default(res, 500, 'Error', error.message, false);
+            }
+        });
+        this.getSpecificLoan = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userData: { isAdmin } } = req.body;
+                const { id } = req.params;
+                if (!isAdmin) {
+                    return responseHelper_1.default(res, 401, 'Error', 'You are not allowed to view this loan application.', false);
+                }
+                const loan = yield schema_1.Loan.findById(id);
+                if (!loan) {
+                    return responseHelper_1.default(res, 404, 'Error', 'loan not found', false);
+                }
+                return responseHelper_1.default(res, 200, 'Success', loan, true);
+            }
+            catch (error) {
+                return responseHelper_1.default(res, 500, 'Error', 'Internal server error, Please try again later', false);
             }
         });
         this.Loan = schema_1.Loan;

@@ -1,14 +1,12 @@
 import * as request from 'supertest';
 import app from '../src/app';
-import { User, Loan } from '../src/Schema/schema';
+import { User } from '../src/Schema/schema';
 import { testData } from './testData';
 
 let appRequest: request.SuperTest<request.Test>;
-let token: string = '';
 
 beforeAll(async () => {
   await User.deleteMany({}, error => console.log(error));
-
   appRequest = request(app);
 });
 afterAll(async () => {
@@ -39,7 +37,6 @@ describe('Authentication test', () => {
         .post('/api/v1/auth/signin')
         .send(testData.signinUserSuccess)
         .set('Accept', 'application/json');
-      token = res.body.data.token;
       expect(res.status).toBe(200);
       expect(res.body.status).toEqual('Success');
       expect(typeof res.body.data.token).toBe('string');
