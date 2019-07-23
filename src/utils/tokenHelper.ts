@@ -19,7 +19,7 @@ class TokenHelper {
         return responseHelper(res, 403, 'Fail', 'No token was provided', false);
       }
       const userData: any = await jwt.verify(token, SECRETE_KEY);
-      req.body.email = userData.email;
+      req.body.userData = userData;
       return next();
     } catch (error) {
       return responseHelper(res, 500, 'Error', error.message, false);

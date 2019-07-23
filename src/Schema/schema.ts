@@ -1,9 +1,22 @@
 import * as mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
+import * as bcrypt from 'bcryptjs';
 
 dotenv.config();
 
-const { TEST_DB, DEV_DB, PROD_DB, NODE_ENV } = process.env;
+const {
+  TEST_DB,
+  DEV_DB,
+  PROD_DB,
+  NODE_ENV,
+  ADMIN_MAIL,
+  ADMIN_FIRSTNAME,
+  ADMIN_LASTNAME,
+  ADMIN_PASSWORD,
+  ADMIN_ADDRESS,
+  ADMIN_LOAN_STATUS,
+  IS_ADMIN
+} = process.env;
 
 let uri: string = '';
 
@@ -58,4 +71,19 @@ const userSchema = new Schema({
 let Loan = mongoose.model('Loan', loansSchema);
 let User = mongoose.model('User', userSchema);
 
+const createAdmin = async () => {
+  const user = await User.findOne({ email: ADMIN_MAIL });
+  if (!user) {
+    await User.create({
+      email: ADMIN_MAIL,
+      firstName: ADMIN_FIRSTNAME,
+      lastName: ADMIN_LASTNAME,
+      password: await bcrypt.hash(ADMIN_PASSWORD, 10),
+      address: ADMIN_ADDRESS,
+      status: ADMIN_LOAN_STATUS,
+      isAdmin: IS_ADMIN
+    });
+  }
+};
+createAdmin();
 export { Loan, User };

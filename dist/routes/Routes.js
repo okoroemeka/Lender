@@ -9,5 +9,6 @@ const router = express.Router();
 router.post('/auth/signup', validate_1.checkInputFields, User_1.default.userSignup);
 router.post('/auth/signin', validate_1.checkInputFields, User_1.default.signin);
 router.post('/loan', validate_1.checkLoanField, tokenHelper_1.default.verifyToken, Loan_1.default.createLoan);
+router.get('/loan', tokenHelper_1.default.verifyToken, Loan_1.default.viewAllLoanApplication);
 exports.default = router;
 //# sourceMappingURL=Routes.js.map

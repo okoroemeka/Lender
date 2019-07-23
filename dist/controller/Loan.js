@@ -12,10 +12,17 @@ const schema_1 = require("../Schema/schema");
 const responseHelper_1 = require("../utils/responseHelper");
 class Loans {
     constructor() {
+        /**
+         * Loan application.
+         * @param req
+         * @param res
+         * @returns object
+         */
         this.createLoan = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { tenor, amount } = req.body;
+                const { tenor, amount, userData: { email } } = req.body;
                 req.body.balance = amount;
+                req.body.email = email;
                 req.body.interest = 0.05 * amount;
                 req.body.paymentInstallment = amount / tenor + req.body.interest;
                 req.body.createdOn = new Date();
@@ -23,7 +30,33 @@ class Loans {
                 return responseHelper_1.default(res, 201, 'Success', createLoan, true);
             }
             catch (error) {
-                return responseHelper_1.default(res, 500, 'Fail', error.message, false);
+                return responseHelper_1.default(res, 500, 'Error', error.message, false);
+            }
+        });
+        /**
+         * Get all loan application
+         * @param req
+         * @param res
+         * @returns object
+         */
+        this.viewAllLoanApplication = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email, isAdmin } = req.body.userData;
+                const loanApplications = yield schema_1.Loan.find(isAdmin ? {} : { email: new RegExp(`${email}`, 'gi') });
+                const responsePackage = {
+                    statusCode: loanApplications.length ? 200 : 404,
+                    status: loanApplications.length ? 'Success' : 'Fail',
+                    message: loanApplications.length
+                        ? loanApplications
+                        : `${isAdmin
+                            ? 'No loan application was found'
+                            : 'You have no loan application yet'}`,
+                    responseType: loanApplications.length ? true : false
+                };
+                return responseHelper_1.default(res, responsePackage.statusCode, responsePackage.status, responsePackage.message, responsePackage.responseType);
+            }
+            catch (error) {
+                return responseHelper_1.default(res, 500, 'Error', error.message, false);
             }
         });
         this.Loan = schema_1.Loan;
