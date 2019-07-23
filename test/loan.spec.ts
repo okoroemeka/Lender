@@ -6,7 +6,7 @@ import { testData } from './testData';
 let appRequest: request.SuperTest<request.Test>;
 let token: string = '';
 let adminToken: string = '';
-
+let loanId: string = '';
 beforeAll(async () => {
   await User.deleteMany({}, error => console.log(error));
   await Loan.deleteMany({}, error => console.log(error));
@@ -37,6 +37,7 @@ describe('Loan test', () => {
       .send(testData.loanData)
       .set('Accept', 'application/json')
       .set('authorization', token);
+    loanId = res.body.data._id;
     expect(res.status).toBe(201);
     expect(res.body.status).toBe('Success');
   });
@@ -62,5 +63,13 @@ describe('Loan test', () => {
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('Success');
     expect(res.body.data.length).toEqual(1);
+  });
+  it('should return success for view specific loan applications by admin', async () => {
+    const res = await appRequest
+      .get(`/api/v1/loan/${loanId}`)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(200);
+    expect(typeof res.body.data).toBe('object');
   });
 });
