@@ -68,6 +68,12 @@ class Loans {
       return responseHelper(res, 500, 'Error', error.message, false);
     }
   };
+  /**
+   * Get specific loan application
+   * @param req
+   * @param res
+   * @returns object
+   */
   getSpecificLoan = async (req: Request, res: Response) => {
     try {
       const {
