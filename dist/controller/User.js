@@ -18,6 +18,12 @@ const { SECRETE_KEY } = process.env;
  */
 class UserAuth {
     constructor() {
+        /**
+         * Signin  User
+         * @param req
+         * @param res
+         * @returns object
+         */
         this.signin = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, password } = req.body;
@@ -27,13 +33,13 @@ class UserAuth {
                 if (!response) {
                     return responseHelper_1.default(res, 404, 'Fail', 'Email does not exist, please signup', false);
                 }
-                const { email: userEmail, password: userPassowrd } = response;
+                const { email: userEmail, password: userPassowrd, isAdmin } = response;
                 if (!(yield bcrypt.compare(password, userPassowrd))) {
                     return responseHelper_1.default(res, 400, 'Fail', 'Wrong email or password', false);
                 }
                 return responseHelper_1.default(res, 200, 'Success', {
                     email: userEmail,
-                    token: tokenHelper_1.default.createToken({ email }, { expiresIn: '1h' }, SECRETE_KEY)
+                    token: tokenHelper_1.default.createToken({ email, isAdmin }, { expiresIn: '10h' }, SECRETE_KEY)
                 }, true);
             }
             catch (error) {
@@ -51,7 +57,7 @@ class UserAuth {
     userSignup(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { email, password } = req.body;
+                const { email, password, lastName, firstName, address } = req.body;
                 const checkUser = yield schema_1.User.findOne({
                     email: new RegExp(`${email}`, 'gi')
                 });
@@ -59,9 +65,14 @@ class UserAuth {
                     return responseHelper_1.default(res, 409, 'Fail', 'Email already exist', false);
                 }
                 let hashPassword = yield bcrypt.hash(password, 10);
-                req.body.password = hashPassword;
-                const { email: userEmail } = yield schema_1.User.create(req.body);
-                const token = yield tokenHelper_1.default.createToken({ email }, { expiresIn: '1h' }, SECRETE_KEY);
+                const { email: userEmail, isAdmin } = yield schema_1.User.create({
+                    email,
+                    password: hashPassword,
+                    lastName,
+                    firstName,
+                    address
+                });
+                const token = yield tokenHelper_1.default.createToken({ email, isAdmin }, { expiresIn: '10h' }, SECRETE_KEY);
                 return responseHelper_1.default(res, 201, 'Success', { email: userEmail, token }, true);
             }
             catch (error) {

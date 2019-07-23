@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("jsonwebtoken");
 const responseHelper_1 = require("../utils/responseHelper");
 const { SECRETE_KEY } = process.env;
-class Token {
+class TokenHelper {
     constructor() {
         this.createToken = (data, expiresIn, secreteKey) => {
             return jwt.sign(data, secreteKey, expiresIn);
@@ -23,8 +23,7 @@ class Token {
                     return responseHelper_1.default(res, 403, 'Fail', 'No token was provided', false);
                 }
                 const userData = yield jwt.verify(token, SECRETE_KEY);
-                console.log(userData);
-                req.body.email = userData.email;
+                req.body.userData = userData;
                 return next();
             }
             catch (error) {
@@ -33,5 +32,5 @@ class Token {
         });
     }
 }
-exports.default = new Token();
+exports.default = new TokenHelper();
 //# sourceMappingURL=tokenHelper.js.map

@@ -22,7 +22,7 @@ class UserAuth {
    */
   async userSignup(req: Request, res: Response) {
     try {
-      const { email, password } = req.body;
+      const { email, password, lastName, firstName, address } = req.body;
       const checkUser = await User.findOne({
         email: new RegExp(`${email}`, 'gi')
       });
@@ -30,11 +30,16 @@ class UserAuth {
         return responseHelper(res, 409, 'Fail', 'Email already exist', false);
       }
       let hashPassword = await bcrypt.hash(password, 10);
-      req.body.password = hashPassword;
-      const { email: userEmail }: any = await User.create(req.body);
+      const { email: userEmail, isAdmin }: any = await User.create({
+        email,
+        password: hashPassword,
+        lastName,
+        firstName,
+        address
+      });
       const token = await Token.createToken(
-        { email },
-        { expiresIn: '1h' },
+        { email, isAdmin },
+        { expiresIn: '10h' },
         SECRETE_KEY
       );
       return responseHelper(
@@ -54,6 +59,12 @@ class UserAuth {
       );
     }
   }
+  /**
+   * Signin  User
+   * @param req
+   * @param res
+   * @returns object
+   */
   signin = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
@@ -69,7 +80,7 @@ class UserAuth {
           false
         );
       }
-      const { email: userEmail, password: userPassowrd } = response;
+      const { email: userEmail, password: userPassowrd, isAdmin } = response;
       if (!(await bcrypt.compare(password, userPassowrd))) {
         return responseHelper(
           res,
@@ -85,7 +96,11 @@ class UserAuth {
         'Success',
         {
           email: userEmail,
-          token: Token.createToken({ email }, { expiresIn: '1h' }, SECRETE_KEY)
+          token: Token.createToken(
+            { email, isAdmin },
+            { expiresIn: '10h' },
+            SECRETE_KEY
+          )
         },
         true
       );
