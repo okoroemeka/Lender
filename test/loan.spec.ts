@@ -72,4 +72,58 @@ describe('Loan test', () => {
     expect(res.status).toBe(200);
     expect(typeof res.body.data).toBe('object');
   });
+  it('should return success for loan approval by admin', async () => {
+    const res = await appRequest
+      .patch(`/api/v1/loan/${loanId}`)
+      .send(testData.approveLoanData)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(200);
+    expect(typeof res.body.data).toBe('object');
+    expect(res.body.data.status).toEqual('approved');
+  });
+  it('should return success for loan rejection by admin', async () => {
+    const res = await appRequest
+      .patch(`/api/v1/loan/${loanId}`)
+      .send(testData.rejectLoanData)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(200);
+    expect(typeof res.body.data).toBe('object');
+    expect(res.body.data.status).toEqual('rejected');
+  });
+  it('should return error for empty status field', async () => {
+    const res = await appRequest
+      .patch(`/api/v1/loan/${loanId}`)
+      .send({})
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(400);
+    expect(res.body.status).toBe('Error');
+    expect(res.body.message).toEqual('Status field is required');
+  });
+  it('should return error for non admin', async () => {
+    const res = await appRequest
+      .patch(`/api/v1/loan/${loanId}`)
+      .send(testData.rejectLoanData)
+      .set('Accept', 'application/json')
+      .set('authorization', token);
+    expect(res.status).toBe(401);
+    expect(res.body.status).toBe('Error');
+    expect(res.body.message).toEqual(
+      'You are not authorised to perform this operation'
+    );
+  });
+  it('should return error for wrong loan status reaction', async () => {
+    const res = await appRequest
+      .patch(`/api/v1/loan/${loanId}`)
+      .send(testData.wrongStatusReaction)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(400);
+    expect(res.body.status).toBe('Error');
+    expect(res.body.message).toEqual(
+      'status should be "approved" or "rejected"'
+    );
+  });
 });

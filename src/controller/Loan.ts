@@ -104,6 +104,51 @@ class Loans {
       );
     }
   };
+  reactToLoanApplication = async (req: Request, res: Response) => {
+    try {
+      const {
+        userData: { isAdmin },
+        status
+      }: any = req.body;
+      const { id }: any = req.params;
+      if (!status || !status.trim().length) {
+        return responseHelper(
+          res,
+          400,
+          'Error',
+          'Status field is required',
+          false
+        );
+      }
+      if (!isAdmin) {
+        return responseHelper(
+          res,
+          401,
+          'Error',
+          'You are not authorised to perform this operation',
+          false
+        );
+      }
+      const statusFromAdmin: string = status.toLowerCase();
+      if (statusFromAdmin !== 'approved' && statusFromAdmin !== 'rejected') {
+        return responseHelper(
+          res,
+          400,
+          'Error',
+          'status should be "approved" or "rejected"',
+          false
+        );
+      }
+      const loan = await Loan.findByIdAndUpdate(
+        id,
+        { status: statusFromAdmin },
+        { new: true }
+      );
+      return responseHelper(res, 200, 'Success', loan, true);
+    } catch (error) {
+      return responseHelper(res, 500, 'Error', error.message, false);
+    }
+  };
 }
 
 export default new Loans();

@@ -21,7 +21,6 @@ export const checkInputFields = (
   next: NextFunction
 ): any => {
   const userInput: arg = req.body;
-  // const data = Object.keys(userInput);
   const emptyFields: Array<string> = [];
   const fieldRequired: Array<string> =
     req.path === '/auth/signup'
@@ -50,6 +49,12 @@ export const checkInputFields = (
   return next();
 };
 
+/**
+ * Validates user inputs.
+ * @param req
+ * @param res
+ * @param next
+ */
 export const checkLoanField = (
   req: Request,
   res: Response,

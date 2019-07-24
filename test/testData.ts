@@ -60,5 +60,14 @@ export const testData: any = {
     amount: 200,
     tenor: 3,
     token: ''
+  },
+  approveLoanData: {
+    status: 'approved'
+  },
+  rejectLoanData: {
+    status: 'rejected'
+  },
+  wrongStatusReaction: {
+    status: 'dejected'
   }
 };
