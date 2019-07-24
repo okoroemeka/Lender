@@ -11,5 +11,7 @@ router.post('/auth/signin', checkInputFields, User.signin);
 router.post('/loan', checkLoanField, Token.verifyToken, Loan.createLoan);
 router.get('/loan', Token.verifyToken, Loan.viewAllLoanApplication);
 router.get('/loan/:id', Token.verifyToken, Loan.getSpecificLoan);
+router.patch('/loan/:id', Token.verifyToken, Loan.reactToLoanApplication);
+
 
 export default router;
