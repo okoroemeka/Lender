@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Loan } from '../Schema/schema';
 import responseHelper from '../utils/responseHelper';
+import notify from '../utils/notificationHelper';
 
 class Loans {
   private Loan: any;
@@ -9,9 +10,9 @@ class Loans {
   }
   /**
    * Loan application.
-   * @param req
-   * @param res
-   * @returns object
+   ** @param {object}req
+   * @param {object}res
+   * @returns {object}loan
    */
   createLoan = async (req: Request, res: Response) => {
     try {
@@ -33,9 +34,9 @@ class Loans {
   };
   /**
    * Get all loan application
-   * @param req
-   * @param res
-   * @returns object
+   * @param {object}req
+   * @param {object}res
+   * @returns {array} loans
    */
   viewAllLoanApplication = async (req: Request, res: Response) => {
     try {
@@ -70,9 +71,9 @@ class Loans {
   };
   /**
    * Get specific loan application
-   * @param req
-   * @param res
-   * @returns object
+   * @param {object}req
+   * @param {object}res
+   * @returns {object} loan
    */
   getSpecificLoan = async (req: Request, res: Response) => {
     try {
@@ -104,6 +105,12 @@ class Loans {
       );
     }
   };
+  /**
+   * React to a specific loan application
+   * @param {object}req
+   * @param {object}res
+   * @returns {array} loan
+   */
   reactToLoanApplication = async (req: Request, res: Response) => {
     try {
       const {
@@ -139,10 +146,24 @@ class Loans {
           false
         );
       }
-      const loan = await Loan.findByIdAndUpdate(
+      const loan: any = await Loan.findByIdAndUpdate(
         id,
         { status: statusFromAdmin },
         { new: true }
+      );
+      await notify(
+        loan.email,
+        'noReply@lender.com',
+        'loan application',
+        `<Strong>
+        ${
+          statusFromAdmin === 'rejected'
+            ? 'We are sorry to inform you that'
+            : ''
+        } ${
+          statusFromAdmin === 'rejected' ? 'y' : 'Y'
+        }our loan application was ${statusFromAdmin}.
+        </strong>`
       );
       return responseHelper(res, 200, 'Success', loan, true);
     } catch (error) {
