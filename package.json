@@ -15,14 +15,15 @@
     "testEnvironment": "node"
   },
   "dependencies": {
+    "@sendgrid/mail": "^6.4.0",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^4.17.0",
     "@types/mongoose": "^5.5.8",
     "@types/morgan": "^1.7.35",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
-    "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.6.4",
     "morgan": "^1.9.1"

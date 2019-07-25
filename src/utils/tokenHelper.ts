@@ -12,7 +12,11 @@ class TokenHelper {
   ): string => {
     return jwt.sign(data, secreteKey, expiresIn);
   };
-  verifyToken = async (req: Request, res: Response, next: NextFunction) => {
+  verifyToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> => {
     try {
       const token = req.headers.authorization || req.body.token;
       if (!token) {
