@@ -8,6 +8,7 @@ sgMail.setApiKey(SENDGRID_API_KEY);
  * @param {string}from
  * @param {string}subject
  * @param {string}html
+ * @Returns {object}
  */
 const notify = async (
   to: string,
