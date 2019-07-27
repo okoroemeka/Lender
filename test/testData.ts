@@ -5,7 +5,8 @@ const {
   ADMIN_LASTNAME,
   ADMIN_PASSWORD,
   ADMIN_ADDRESS,
-  IS_ADMIN
+  IS_ADMIN,
+  TEST_EMAIL
 } = process.env;
 interface user {
   lastName: string;
@@ -21,8 +22,8 @@ export const testData: any = {
   signupUserSuccess: {
     lastName: 'nnaemeka',
     firstName: 'okoro',
-    email: 'mekarw056@gmail.com',
-    password: 'wise2424',
+    email: TEST_EMAIL,
+    password: 'core0987',
     address: '1 aminu'
   },
   signupAdminUserSuccess: async () => ({
@@ -36,13 +37,13 @@ export const testData: any = {
   signupExistingUser: {
     lastName: 'nnaemeka',
     firstName: 'okoro',
-    email: 'mekarw056@gmail.com',
-    password: 'wise2424',
+    email: TEST_EMAIL,
+    password: 'core0987',
     address: '1 aminu'
   },
   signinUserSuccess: {
-    email: 'mekarw056@gmail.com',
-    password: 'wise2424'
+    email: TEST_EMAIL,
+    password: 'core0987'
   },
   signinAdminUserSuccess: {
     email: ADMIN_MAIL,
@@ -53,8 +54,8 @@ export const testData: any = {
     password: 'wise2424'
   },
   signinUserWrongPassword: {
-    email: 'mekarw056@gmail.com',
-    password: 'wise224'
+    email: TEST_EMAIL,
+    password: 'ce0987'
   },
   loanData: {
     amount: 200,
@@ -69,5 +70,14 @@ export const testData: any = {
   },
   wrongStatusReaction: {
     status: 'dejected'
+  },
+  verifyUserData: {
+    verificationStatus: 'verified'
+  },
+  verifyUserWithEmptyStatusData: {
+    verificationStatus: ''
+  },
+  verifyUserWithWrongStatusData: {
+    verificationStatus: 'verify'
   }
 };

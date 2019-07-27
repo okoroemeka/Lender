@@ -2,12 +2,21 @@ import * as request from 'supertest';
 import app from '../src/app';
 import { User } from '../src/Schema/schema';
 import { testData } from './testData';
-
+const { TEST_EMAIL } = process.env;
 let appRequest: request.SuperTest<request.Test>;
-
+let adminToken: string = '';
+let token: string = '';
 beforeAll(async () => {
   await User.deleteMany({}, error => console.log(error));
+  const adminData = await testData.signupAdminUserSuccess();
+  await User.create(adminData);
   appRequest = request(app);
+
+  const adminSigninResponse = await appRequest
+    .post('/api/v1/auth/signin')
+    .send(testData.signinAdminUserSuccess)
+    .set('Accept', 'application/json');
+  adminToken = adminSigninResponse.body.data.token;
 });
 afterAll(async () => {
   await User.deleteMany({}, error => console.log(error));
@@ -37,6 +46,7 @@ describe('Authentication test', () => {
         .post('/api/v1/auth/signin')
         .send(testData.signinUserSuccess)
         .set('Accept', 'application/json');
+      token = res.body.data.token;
       expect(res.status).toBe(200);
       expect(res.body.status).toEqual('Success');
       expect(typeof res.body.data.token).toBe('string');
@@ -56,6 +66,51 @@ describe('Authentication test', () => {
       expect(res.status).toBe(400);
       expect(res.body.status).toEqual('Fail');
       expect(res.body.message).toEqual('Wrong email or password');
+    });
+    it('should verify a user', async () => {
+      const res = await appRequest
+        .patch(`/api/v1/users/${TEST_EMAIL}/verify`)
+        .send(testData.verifyUserData)
+        .set('Accept', 'application/json')
+        .set('authorization', adminToken);
+      expect(res.status).toBe(200);
+      expect(res.body.status).toEqual('Success');
+      expect(typeof res.body.data).toEqual('object');
+      expect(res.body.data.status).toEqual('verified');
+    });
+    it('should return error for non admin trying to verify a user', async () => {
+      const res = await appRequest
+        .patch(`/api/v1/users/${TEST_EMAIL}/verify`)
+        .send(testData.verifyUserData)
+        .set('Accept', 'application/json')
+        .set('authorization', token);
+      expect(res.status).toBe(403);
+      expect(res.body.status).toEqual('Error');
+      expect(res.body.message).toEqual(
+        'You are not alllowed to perform this operation'
+      );
+    });
+    it('should return error for trying to verify a user with empty status', async () => {
+      const res = await appRequest
+        .patch(`/api/v1/users/${TEST_EMAIL}/verify`)
+        .send(testData.verifyUserWithEmptyStatusData)
+        .set('Accept', 'application/json')
+        .set('authorization', adminToken);
+      expect(res.status).toBe(400);
+      expect(res.body.status).toEqual('Error');
+      expect(res.body.message).toEqual('The verify user field cannot be empty');
+    });
+    it('should return error for trying to verify a user with wrong status', async () => {
+      const res = await appRequest
+        .patch(`/api/v1/users/${TEST_EMAIL}/verify`)
+        .send(testData.verifyUserWithWrongStatusData)
+        .set('Accept', 'application/json')
+        .set('authorization', adminToken);
+      expect(res.status).toBe(400);
+      expect(res.body.status).toEqual('Error');
+      expect(res.body.message).toEqual(
+        'verification status must be "verified" or "unverified"'
+      );
     });
   });
 });

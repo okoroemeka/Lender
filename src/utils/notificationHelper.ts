@@ -1,7 +1,10 @@
-import * as sgMail from '@sendgrid/mail';
+import * as mailgun from 'mailgun-js';
+const { API_KEY, DOMAIN } = process.env;
 
-const { SENDGRID_API_KEY } = process.env;
-sgMail.setApiKey(SENDGRID_API_KEY);
+let transporter = mailgun({
+  apiKey: API_KEY,
+  domain: DOMAIN
+});
 /**
  * Sends notification.
  * @param {string}to
@@ -22,6 +25,6 @@ const notify = async (
     subject,
     html
   };
-  return sgMail.send(msg);
+  return transporter.messages().send(msg);
 };
 export default notify;

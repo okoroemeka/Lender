@@ -3,6 +3,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '../Schema/schema';
 import responseHelper from '../utils/responseHelper';
 import Token from '../utils/tokenHelper';
+import notify from '../utils/notificationHelper';
 
 const { SECRETE_KEY } = process.env;
 
@@ -16,9 +17,9 @@ class UserAuth {
   }
   /**
    * Creates New User
-   * @param req
-   * @param res
-   * @returns object
+   * @param {object}req
+   * @param {object}res
+   * @returns {object}user
    */
   async userSignup(req: Request, res: Response) {
     try {
@@ -61,9 +62,9 @@ class UserAuth {
   }
   /**
    * Signin  User
-   * @param req
-   * @param res
-   * @returns object
+   * @param {object}req
+   * @param {object}res
+   * @returns {object}user
    */
   signin = async (req: Request, res: Response) => {
     try {
@@ -104,6 +105,67 @@ class UserAuth {
         },
         true
       );
+    } catch (error) {
+      return responseHelper(res, 500, 'Error', error.message, false);
+    }
+  };
+  /**
+   * Verify a User loan application
+   * @param {object}req
+   * @param {object}res
+   * @returns {object}user
+   */
+  verifyUser = async (req: Request, res: Response) => {
+    try {
+      const { user_email: email } = req.params;
+      const {
+        userData: { isAdmin },
+        verificationStatus
+      } = req.body;
+      if (!isAdmin)
+        return responseHelper(
+          res,
+          403,
+          'Error',
+          'You are not alllowed to perform this operation',
+          false
+        );
+      if (!verificationStatus || !verificationStatus.trim().length)
+        return responseHelper(
+          res,
+          400,
+          'Error',
+          'The verify user field cannot be empty',
+          false
+        );
+      const statusValue = verificationStatus.toLowerCase();
+      if (statusValue !== 'verified' && statusValue !== 'unverified') {
+        return responseHelper(
+          res,
+          400,
+          'Error',
+          'verification status must be "verified" or "unverified"',
+          false
+        );
+      }
+      const user = await User.findOneAndUpdate(
+        { email },
+        { status: statusValue },
+        { new: true }
+      );
+      await notify(
+        email,
+        'noReply@lender.com',
+        'user verification',
+        `<Strong>
+      ${
+        statusValue === 'unverified'
+          ? "Sorry, you can't apply for loan."
+          : 'You have been verified to apply for a loan'
+      } 
+      </strong>`
+      );
+      return responseHelper(res, 200, 'Success', user, true);
     } catch (error) {
       return responseHelper(res, 500, 'Error', error.message, false);
     }
