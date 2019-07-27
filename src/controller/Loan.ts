@@ -10,7 +10,7 @@ class Loans {
   }
   /**
    * Loan application.
-   ** @param {object}req
+   * @param {object}req
    * @param {object}res
    * @returns {object}loan
    */
