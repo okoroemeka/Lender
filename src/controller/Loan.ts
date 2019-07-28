@@ -3,6 +3,30 @@ import { Loan } from '../Schema/schema';
 import responseHelper from '../utils/responseHelper';
 import notify from '../utils/notificationHelper';
 
+const { NODE_ENV } = process.env;
+interface loan {
+  id: string;
+  user_email: string;
+  createdOn: string;
+  status: string;
+  repaid: boolean;
+  tenor: number;
+  amount: number;
+  paymentInstallment: number;
+  balance: number;
+  interest: number;
+  debtor: number;
+}
+interface user {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  address: string;
+  status: string;
+  isAdmin: boolean;
+  loans: Array<string>;
+}
 class Loans {
   private Loan: any;
   constructor() {
@@ -21,12 +45,12 @@ class Loans {
         amount,
         userData: { email }
       } = req.body;
-      req.body.balance = amount;
+      req.body.balance = amount + 0.05 * amount * tenor;
       req.body.email = email;
       req.body.interest = 0.05 * amount;
       req.body.paymentInstallment = amount / tenor + req.body.interest;
       req.body.createdOn = new Date();
-      const createLoan = await Loan.create(req.body);
+      const createLoan: any = await Loan.create(req.body);
       return responseHelper(res, 201, 'Success', createLoan, true);
     } catch (error) {
       return responseHelper(res, 500, 'Error', error.message, false);
@@ -168,6 +192,80 @@ class Loans {
       return responseHelper(res, 200, 'Success', loan, true);
     } catch (error) {
       return responseHelper(res, 500, 'Error', error.message, false);
+    }
+  };
+  /**
+   * Loan repayment by an admin
+   * @param {object}req
+   * @param {object}res
+   * @returns {object} loan
+   */
+  loanRepayment = async (req: Request, res: Response) => {
+    try {
+      const { loanId: id }: any = req.params;
+      const {
+        userData: { isAdmin },
+        amount
+      }: any = req.body;
+      if (!isAdmin) {
+        return responseHelper(
+          res,
+          401,
+          'Error',
+          'You are not authorised to perform this operation',
+          false
+        );
+      }
+      const loan: any = await Loan.findById(id);
+      if (!loan) {
+        return responseHelper(res, 404, 'Error', 'loan not found', false);
+      }
+      const { amount: amountBorrowed, balance, repaid } = loan;
+      if (repaid) {
+        return responseHelper(
+          res,
+          400,
+          'Error',
+          'Loan has been already repaid',
+          false
+        );
+      }
+      if (amount > balance) {
+        return responseHelper(
+          res,
+          400,
+          'Error',
+          'Amount being paid is greater than what is owed',
+          false
+        );
+      }
+      if (amount <= 0) {
+        return responseHelper(
+          res,
+          400,
+          'Error',
+          'Amount must be greater than 0',
+          false
+        );
+      }
+      const loanUpdated: any = await Loan.findByIdAndUpdate(
+        id,
+        { balance: balance - amount, repaid: balance === amount && true },
+        { new: true }
+      );
+      return responseHelper(res, 200, 'Success', loanUpdated, true);
+    } catch (error) {
+      return responseHelper(
+        res,
+        500,
+        'Error',
+        `${
+          NODE_ENV === 'test' || NODE_ENV === 'dev'
+            ? error.message
+            : 'Internal server error, please try again later'
+        }`,
+        false
+      );
     }
   };
 }
