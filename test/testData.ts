@@ -88,5 +88,8 @@ export const testData: any = {
   },
   loanRepaymentOverPay: {
     amount: 5000
+  },
+  loanRepaymentTestData: {
+    amount: 230
   }
 };

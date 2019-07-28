@@ -64,9 +64,42 @@ class Loans {
    */
   viewAllLoanApplication = async (req: Request, res: Response) => {
     try {
+      const { status, repaid } = req.query;
       const {
         userData: { email, isAdmin }
       } = req.body;
+      if (status && repaid) {
+        const response: Array<object> | string = isAdmin
+          ? await Loan.find({ status, repaid })
+          : 'You are not authorised to perform this operation';
+        const responseObject: object = {
+          statusCode: isAdmin ? (response.length ? 200 : 404) : 401,
+          status: isAdmin ? (response.length ? 'Success' : 'Error') : 'Error',
+          dataOrMessage: isAdmin
+            ? response.length
+              ? response
+              : 'No loan found'
+            : response,
+          responsHelperStatus: isAdmin
+            ? response.length
+              ? true
+              : false
+            : false
+        };
+        const {
+          statusCode,
+          status: helperStatus,
+          dataOrMessage,
+          responsHelperStatus
+        }: any = responseObject;
+        return responseHelper(
+          res,
+          statusCode,
+          helperStatus,
+          dataOrMessage,
+          responsHelperStatus
+        );
+      }
       const loanApplications: Array<object> = await Loan.find(
         isAdmin ? {} : { email: new RegExp(`${email}`, 'gi') }
       );
@@ -250,7 +283,10 @@ class Loans {
       }
       const loanUpdated: any = await Loan.findByIdAndUpdate(
         id,
-        { balance: balance - amount, repaid: balance === amount && true },
+        {
+          balance: balance - amount,
+          repaid: balance === amount ? true : false
+        },
         { new: true }
       );
       return responseHelper(res, 200, 'Success', loanUpdated, true);
@@ -269,5 +305,4 @@ class Loans {
     }
   };
 }
-
 export default new Loans();

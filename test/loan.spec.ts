@@ -33,7 +33,7 @@ afterAll(async () => {
 describe('Loan test', () => {
   it('should return success loan application', async () => {
     const res = await appRequest
-      .post('/api/v1/loan')
+      .post('/api/v1/loans')
       .send(testData.loanData)
       .set('Accept', 'application/json')
       .set('authorization', token);
@@ -43,12 +43,12 @@ describe('Loan test', () => {
   });
   it('should return success for view loan applications by admin', async () => {
     await appRequest
-      .post('/api/v1/loan')
+      .post('/api/v1/loans')
       .send(testData.loanData)
       .set('Accept', 'application/json')
       .set('authorization', adminToken);
     const res = await appRequest
-      .get('/api/v1/loan')
+      .get('/api/v1/loans')
       .set('Accept', 'application/json')
       .set('authorization', adminToken);
     expect(res.status).toBe(200);
@@ -57,7 +57,7 @@ describe('Loan test', () => {
   });
   it('should return success for view loan applications by non admin', async () => {
     const res = await appRequest
-      .get('/api/v1/loan')
+      .get('/api/v1/loans')
       .set('Accept', 'application/json')
       .set('authorization', token);
     expect(res.status).toBe(200);
@@ -66,7 +66,7 @@ describe('Loan test', () => {
   });
   it('should return success for view specific loan applications by admin', async () => {
     const res = await appRequest
-      .get(`/api/v1/loan/${loanId}`)
+      .get(`/api/v1/loans/${loanId}`)
       .set('Accept', 'application/json')
       .set('authorization', adminToken);
     expect(res.status).toBe(200);
@@ -74,7 +74,7 @@ describe('Loan test', () => {
   });
   it('should return success for loan approval by admin', async () => {
     const res = await appRequest
-      .patch(`/api/v1/loan/${loanId}`)
+      .patch(`/api/v1/loans/${loanId}`)
       .send(testData.approveLoanData)
       .set('Accept', 'application/json')
       .set('authorization', adminToken);
@@ -84,7 +84,7 @@ describe('Loan test', () => {
   });
   it('should return success for loan rejection by admin', async () => {
     const res = await appRequest
-      .patch(`/api/v1/loan/${loanId}`)
+      .patch(`/api/v1/loans/${loanId}`)
       .send(testData.rejectLoanData)
       .set('Accept', 'application/json')
       .set('authorization', adminToken);
@@ -94,7 +94,7 @@ describe('Loan test', () => {
   });
   it('should return error for empty status field', async () => {
     const res = await appRequest
-      .patch(`/api/v1/loan/${loanId}`)
+      .patch(`/api/v1/loans/${loanId}`)
       .send({})
       .set('Accept', 'application/json')
       .set('authorization', adminToken);
@@ -104,7 +104,7 @@ describe('Loan test', () => {
   });
   it('should return error for non admin', async () => {
     const res = await appRequest
-      .patch(`/api/v1/loan/${loanId}`)
+      .patch(`/api/v1/loans/${loanId}`)
       .send(testData.rejectLoanData)
       .set('Accept', 'application/json')
       .set('authorization', token);
@@ -116,7 +116,7 @@ describe('Loan test', () => {
   });
   it('should return error for wrong loan status reaction', async () => {
     const res = await appRequest
-      .patch(`/api/v1/loan/${loanId}`)
+      .patch(`/api/v1/loans/${loanId}`)
       .send(testData.wrongStatusReaction)
       .set('Accept', 'application/json')
       .set('authorization', adminToken);
@@ -188,6 +188,64 @@ describe('Loan test', () => {
       .set('authorization', adminToken);
     expect(res.status).toBe(500);
     expect(res.body.status).toEqual('Error');
-    // expect(res.body.message).toEqual('loan not found');
+  });
+  it('Should return error when no fully repaid loan', async () => {
+    const res = await appRequest
+      .get(`/api/v1/loans?status=approved&repaid=true`)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(404);
+    expect(res.body.status).toEqual('Error');
+    expect(res.body.message).toEqual('No loan found');
+  });
+  describe('get loans by admin', () => {
+    let loanId: string = '';
+    beforeAll(async () => {
+      try {
+        const response: any = await appRequest
+          .post('/api/v1/loans')
+          .send(testData.loanData)
+          .set('Accept', 'application/json')
+          .set('authorization', token);
+        const {
+          body: {
+            data: { _id }
+          }
+        }: any = response;
+        loanId = _id;
+        await appRequest
+          .patch(`/api/v1/loans/${loanId}`)
+          .send(testData.approveLoanData)
+          .set('Accept', 'application/json')
+          .set('authorization', adminToken);
+        await appRequest
+          .post(`/api/v1/loans/${loanId}/repayment`)
+          .send(testData.loanRepaymentTestData)
+          .set('Accept', 'application/json')
+          .set('authorization', adminToken);
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    });
+    it('Should return success for viewing all fully repaid loan by an admin', async () => {
+      const res = await appRequest
+        .get(`/api/v1/loans?status=approved&repaid=true`)
+        .set('Accept', 'application/json')
+        .set('authorization', adminToken);
+      expect(res.status).toBe(200);
+      expect(res.body.status).toEqual('Success');
+      expect(typeof res.body.data).toEqual('object');
+    });
+    it('Should return error for viewing all fully repaid loan by non admin user', async () => {
+      const res = await appRequest
+        .get(`/api/v1/loans?status=approved&repaid=true`)
+        .set('Accept', 'application/json')
+        .set('authorization', token);
+      expect(res.status).toBe(401);
+      expect(res.body.status).toEqual('Error');
+      expect(res.body.message).toEqual(
+        'You are not authorised to perform this operation'
+      );
+    });
   });
 });
