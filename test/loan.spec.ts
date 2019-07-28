@@ -126,4 +126,68 @@ describe('Loan test', () => {
       'status should be "approved" or "rejected"'
     );
   });
+  it('Should return 200 for post a loan repayment by an admin', async () => {
+    const res = await appRequest
+      .post(`/api/v1/loans/${loanId}/repayment`)
+      .send(testData.loanRepaymentdata)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(200);
+    expect(res.body.status).toEqual('Success');
+    expect(typeof res.body.data).toEqual('object');
+  });
+  it('Should return Error for loan repayment amount less than 0 or equal to 0', async () => {
+    const res = await appRequest
+      .post(`/api/v1/loans/${loanId}/repayment`)
+      .send(testData.loanRepaymentAmountZero)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(400);
+    expect(res.body.status).toEqual('Error');
+    expect(res.body.message).toEqual('Amount must be greater than 0');
+  });
+  it('Should return Error for loan overpayment', async () => {
+    const res = await appRequest
+      .post(`/api/v1/loans/${loanId}/repayment`)
+      .send(testData.loanRepaymentOverPay)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(400);
+    expect(res.body.status).toEqual('Error');
+    expect(res.body.message).toEqual(
+      'Amount being paid is greater than what is owed'
+    );
+  });
+  it('Should return Error for loan repayment post by non admin', async () => {
+    const res = await appRequest
+      .post(`/api/v1/loans/${loanId}/repayment`)
+      .send(testData.loanRepaymentOverPay)
+      .set('Accept', 'application/json')
+      .set('authorization', token);
+    expect(res.status).toBe(401);
+    expect(res.body.status).toEqual('Error');
+    expect(res.body.message).toEqual(
+      'You are not authorised to perform this operation'
+    );
+  });
+  it('Should return Error for loan that does not exist', async () => {
+    const res = await appRequest
+      .post(`/api/v1/loans/${'5d3ccc26023096d98d193022'}/repayment`)
+      .send(testData.loanRepaymentOverPay)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(404);
+    expect(res.body.status).toEqual('Error');
+    expect(res.body.message).toEqual('loan not found');
+  });
+  it('Should return Error for wrong type of loan Id', async () => {
+    const res = await appRequest
+      .post(`/api/v1/loans/${1234}/repayment`)
+      .send(testData.loanRepaymentOverPay)
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(500);
+    expect(res.body.status).toEqual('Error');
+    // expect(res.body.message).toEqual('loan not found');
+  });
 });

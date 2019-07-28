@@ -79,5 +79,14 @@ export const testData: any = {
   },
   verifyUserWithWrongStatusData: {
     verificationStatus: 'verify'
+  },
+  loanRepaymentdata: {
+    amount: 100
+  },
+  loanRepaymentAmountZero: {
+    amount: 0
+  },
+  loanRepaymentOverPay: {
+    amount: 5000
   }
 };

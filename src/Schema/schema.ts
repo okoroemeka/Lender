@@ -37,17 +37,17 @@ mongoose.connect(uri, (error: any) => {
 console.log(process.env.NODE_ENV);
 const { Schema } = mongoose;
 const loansSchema = new Schema({
-  email: { type: String, ref: 'User', required: true }, // user email
+  email: { type: String, ref: 'User', required: true },
   createdOn: { type: Date, required: true },
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
-  }, // pending, approved, approved
+  },
   repaid: { type: Boolean, default: false },
-  tenor: { type: Number, required: true }, // maximum of 12 months
+  tenor: { type: Number, required: true },
   amount: { type: Number, required: true },
-  paymentInstallment: { type: Number }, // monthly installment payment(amount + interest) / tenor
+  paymentInstallment: { type: Number },
   balance: { type: Number },
   interest: { type: Number }
   // _debtor: { type: Number, ref: 'User' }
@@ -63,7 +63,7 @@ const userSchema = new Schema({
     type: String,
     enum: ['Verified', 'Unverified'],
     default: 'Unverified'
-  }, // unverified or verified
+  },
   isAdmin: { type: Boolean, default: false },
   loans: [{ type: Schema.Types.ObjectId, ref: 'Loan' }]
 });

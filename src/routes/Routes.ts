@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/auth/signup', checkInputFields, User.userSignup);
 router.post('/auth/signin', checkInputFields, User.signin);
 router.post('/loan', checkLoanField, Token.verifyToken, Loan.createLoan);
+router.post('/loans/:loanId/repayment', Token.verifyToken, Loan.loanRepayment);
 router.get('/loan', Token.verifyToken, Loan.viewAllLoanApplication);
 router.get('/loan/:id', Token.verifyToken, Loan.getSpecificLoan);
 router.patch('/loan/:id', Token.verifyToken, Loan.reactToLoanApplication);
