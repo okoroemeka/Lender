@@ -4,29 +4,6 @@ import responseHelper from '../utils/responseHelper';
 import notify from '../utils/notificationHelper';
 
 const { NODE_ENV } = process.env;
-interface loan {
-  id: string;
-  user_email: string;
-  createdOn: string;
-  status: string;
-  repaid: boolean;
-  tenor: number;
-  amount: number;
-  paymentInstallment: number;
-  balance: number;
-  interest: number;
-  debtor: number;
-}
-interface user {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  address: string;
-  status: string;
-  isAdmin: boolean;
-  loans: Array<string>;
-}
 class Loans {
   private Loan: any;
   constructor() {
@@ -68,7 +45,11 @@ class Loans {
       const {
         userData: { email, isAdmin }
       } = req.body;
-      if (status && repaid) {
+
+      if (
+        (status === 'approved' && repaid === 'true') ||
+        (status === 'approved' && repaid === 'false')
+      ) {
         const response: Array<object> | string = isAdmin
           ? await Loan.find({ status, repaid })
           : 'You are not authorised to perform this operation';
@@ -101,11 +82,11 @@ class Loans {
         );
       }
       const loanApplications: Array<object> = await Loan.find(
-        isAdmin ? {} : { email: new RegExp(`${email}`, 'gi') }
+        isAdmin ? {} : { email: new RegExp(`${email}`, 'i') }
       );
       const responsePackage: any = {
         statusCode: loanApplications.length ? 200 : 404,
-        status: loanApplications.length ? 'Success' : 'Fail',
+        status: loanApplications.length ? 'Success' : 'Error',
         message: loanApplications.length
           ? loanApplications
           : `${
@@ -253,7 +234,7 @@ class Loans {
       if (!loan) {
         return responseHelper(res, 404, 'Error', 'loan not found', false);
       }
-      const { amount: amountBorrowed, balance, repaid } = loan;
+      const { balance, repaid } = loan;
       if (repaid) {
         return responseHelper(
           res,

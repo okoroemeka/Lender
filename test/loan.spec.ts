@@ -199,35 +199,41 @@ describe('Loan test', () => {
     expect(res.body.message).toEqual('No loan found');
   });
   describe('get loans by admin', () => {
-    let loanId: string = '';
+    let loanIds: Array<string> = [];
     beforeAll(async () => {
       try {
-        const response: any = await appRequest
-          .post('/api/v1/loans')
-          .send(testData.loanData)
-          .set('Accept', 'application/json')
-          .set('authorization', token);
-        const {
-          body: {
-            data: { _id }
-          }
-        }: any = response;
-        loanId = _id;
-        await appRequest
-          .patch(`/api/v1/loans/${loanId}`)
-          .send(testData.approveLoanData)
-          .set('Accept', 'application/json')
-          .set('authorization', adminToken);
-        await appRequest
-          .post(`/api/v1/loans/${loanId}/repayment`)
-          .send(testData.loanRepaymentTestData)
-          .set('Accept', 'application/json')
-          .set('authorization', adminToken);
+        for (let i = 0; i < 2; i++) {
+          const response: any = await appRequest
+            .post('/api/v1/loans')
+            .send(testData.loanData)
+            .set('Accept', 'application/json')
+            .set('authorization', token);
+          const {
+            body: {
+              data: { _id }
+            }
+          }: any = response;
+          loanIds.push(_id);
+          await appRequest
+            .patch(`/api/v1/loans/${_id}`)
+            .send(testData.approveLoanData)
+            .set('Accept', 'application/json')
+            .set('authorization', adminToken);
+          await appRequest
+            .post(`/api/v1/loans/${_id}/repayment`)
+            .send(
+              i === 0
+                ? testData.loanRepaymentTestData
+                : testData.loanRepaymentdata
+            )
+            .set('Accept', 'application/json')
+            .set('authorization', adminToken);
+        }
       } catch (error) {
         throw new Error(error.message);
       }
     });
-    it('Should return success for viewing all fully repaid loan by an admin', async () => {
+    it('Should return success for viewing all fully repaid loans by an admin', async () => {
       const res = await appRequest
         .get(`/api/v1/loans?status=approved&repaid=true`)
         .set('Accept', 'application/json')
@@ -246,6 +252,15 @@ describe('Loan test', () => {
       expect(res.body.message).toEqual(
         'You are not authorised to perform this operation'
       );
+    });
+    it('Should return success for viewing all loans that are not fully repaid', async () => {
+      const res = await appRequest
+        .get(`/api/v1/loans?status=approved&repaid=false`)
+        .set('Accept', 'application/json')
+        .set('authorization', adminToken);
+      expect(res.status).toBe(200);
+      expect(res.body.status).toEqual('Success');
+      expect(typeof res.body.data).toEqual('object');
     });
   });
 });
