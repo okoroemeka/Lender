@@ -199,7 +199,7 @@ describe('Loan test', () => {
     expect(res.body.message).toEqual('No loan found');
   });
   describe('get loans by admin', () => {
-    let loanIds: Array<string> = [];
+    const loanIds: Array<string> = [];
     beforeAll(async () => {
       try {
         for (let i = 0; i < 2; i++) {
@@ -261,6 +261,23 @@ describe('Loan test', () => {
       expect(res.status).toBe(200);
       expect(res.body.status).toEqual('Success');
       expect(typeof res.body.data).toEqual('object');
+    });
+    it('should return success for view loan repayment  history', async () => {
+      const res = await appRequest
+        .get(`/api/v1/loans/${loanIds[0]}/repayments`)
+        .set('Accept', 'application/json')
+        .set('authorization', adminToken);
+      expect(res.status).toBe(200);
+      expect(typeof res.body.data).toEqual('object');
+    });
+    it('should return error for view loan repayment history with wrong Id', async () => {
+      const res = await appRequest
+        .get(`/api/v1/loans/8uihgtr5/repayments`)
+        .set('Accept', 'application/json')
+        .set('authorization', adminToken);
+      expect(res.status).toBe(404);
+      expect(res.body.status).toEqual('Error');
+      expect(res.body.message).toEqual('No loan history found');
     });
   });
 });
