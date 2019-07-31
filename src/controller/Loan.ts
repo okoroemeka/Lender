@@ -1,13 +1,30 @@
 import { Request, Response } from 'express';
-import { Loan } from '../Schema/schema';
+import { Loan, LoanRepayment } from '../Schema/schema';
 import responseHelper from '../utils/responseHelper';
 import notify from '../utils/notificationHelper';
 
 const { NODE_ENV } = process.env;
+
+interface LoanInterface {
+  status: string;
+  repaid: false;
+  _id: string;
+  amount: number;
+  tenor: number;
+  balance: number;
+  email: string;
+  interest: number;
+  paymentInstallment: number;
+  createdOn: string;
+  __v: number;
+}
+
 class Loans {
   private Loan: any;
+  private LoanRepayment: any;
   constructor() {
     this.Loan = Loan;
+    this.LoanRepayment = LoanRepayment;
   }
   /**
    * Loan application.
@@ -22,10 +39,12 @@ class Loans {
         amount,
         userData: { email }
       } = req.body;
-      req.body.balance = amount + 0.05 * amount * tenor;
+      const newAmount: number = parseInt(amount, 10);
+      const newTenor: number = parseInt(tenor, 10);
+      req.body.balance = 0.05 * newAmount * newTenor + newAmount;
       req.body.email = email;
-      req.body.interest = 0.05 * amount;
-      req.body.paymentInstallment = amount / tenor + req.body.interest;
+      req.body.interest = 0.05 * newAmount;
+      req.body.monthlyInstallment = newAmount / newTenor + req.body.interest;
       req.body.createdOn = new Date();
       const createLoan: any = await Loan.create(req.body);
       return responseHelper(res, 201, 'Success', createLoan, true);
@@ -219,7 +238,7 @@ class Loans {
       const { loanId: id }: any = req.params;
       const {
         userData: { isAdmin },
-        amount
+        amount: paidAmount
       }: any = req.body;
       if (!isAdmin) {
         return responseHelper(
@@ -234,7 +253,7 @@ class Loans {
       if (!loan) {
         return responseHelper(res, 404, 'Error', 'loan not found', false);
       }
-      const { balance, repaid } = loan;
+      const { balance, repaid, monthlyInstallment, amount } = loan;
       if (repaid) {
         return responseHelper(
           res,
@@ -244,7 +263,7 @@ class Loans {
           false
         );
       }
-      if (amount > balance) {
+      if (paidAmount > balance) {
         return responseHelper(
           res,
           400,
@@ -253,7 +272,7 @@ class Loans {
           false
         );
       }
-      if (amount <= 0) {
+      if (paidAmount <= 0) {
         return responseHelper(
           res,
           400,
@@ -262,15 +281,66 @@ class Loans {
           false
         );
       }
-      const loanUpdated: any = await Loan.findByIdAndUpdate(
+      const { balance: newbalance }: any = await Loan.findByIdAndUpdate(
         id,
         {
-          balance: balance - amount,
-          repaid: balance === amount ? true : false
+          balance: balance - paidAmount,
+          repaid: balance === paidAmount ? true : false
         },
         { new: true }
       );
-      return responseHelper(res, 200, 'Success', loanUpdated, true);
+      const payLoad: object = {
+        loanId: id,
+        paidAmount,
+        monthlyInstallment,
+        createdOn: new Date()
+      };
+      const { createdOn }: any = await LoanRepayment.create(payLoad);
+      const responseOject: object = {
+        createdOn,
+        loanId: id,
+        amount,
+        monthlyInstallment,
+        paidAmount,
+        newbalance
+      };
+      return responseHelper(res, 200, 'Success', responseOject, true);
+    } catch (error) {
+      return responseHelper(
+        res,
+        500,
+        'Error',
+        `${
+          NODE_ENV === 'test' || NODE_ENV === 'dev'
+            ? error.message
+            : 'Internal server error, please try again later'
+        }`,
+        false
+      );
+    }
+  };
+  /**
+   * Get loan repayment history
+   * @param {object}req
+   * @param {object}res
+   * @returns {object} loans
+   */
+  loanRepaymentHistory = async (req: Request, res: Response) => {
+    const { loanId } = req.params;
+    try {
+      const loans: any = await LoanRepayment.find({
+        loanId
+      });
+      if (!loans.length) {
+        return responseHelper(
+          res,
+          404,
+          'Error',
+          'No loan history found',
+          false
+        );
+      }
+      return responseHelper(res, 200, 'Success', loans, true);
     } catch (error) {
       return responseHelper(
         res,

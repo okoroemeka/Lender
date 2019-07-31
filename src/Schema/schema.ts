@@ -47,12 +47,18 @@ const loansSchema = new Schema({
   repaid: { type: Boolean, default: false },
   tenor: { type: Number, required: true },
   amount: { type: Number, required: true },
-  paymentInstallment: { type: Number },
+  monthlyInstallment: { type: Number },
   balance: { type: Number },
   interest: { type: Number }
   // _debtor: { type: Number, ref: 'User' }
 });
 
+const LoanRepaymentSchema = new Schema({
+  loanId: { type: String, ref: 'Loan', required: true },
+  paidAmount: { type: Number, required: true },
+  monthlyInstallment: { type: Number },
+  createdOn: { type: Date, required: true }
+});
 const userSchema = new Schema({
   email: { type: String, required: true },
   firstName: { type: String, required: true },
@@ -70,6 +76,7 @@ const userSchema = new Schema({
 
 let Loan = mongoose.model('Loan', loansSchema);
 let User = mongoose.model('User', userSchema);
+let LoanRepayment = mongoose.model('LoanRepayMent', LoanRepaymentSchema);
 
 const createAdmin = async () => {
   const user = await User.findOne({ email: ADMIN_MAIL });
@@ -86,4 +93,4 @@ const createAdmin = async () => {
   }
 };
 createAdmin();
-export { Loan, User };
+export { Loan, User, LoanRepayment };
