@@ -91,5 +91,11 @@ export const testData: any = {
   },
   loanRepaymentTestData: {
     amount: 230
+  },
+  resetPassword: {
+    email: TEST_EMAIL
+  },
+  resetPasswordWrongEmail: {
+    email: 'emeka@yahoo.com'
   }
 };

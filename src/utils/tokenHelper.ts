@@ -3,11 +3,14 @@ import * as jwt from 'jsonwebtoken';
 import responseHelper from '../utils/responseHelper';
 const { SECRETE_KEY } = process.env;
 
+export interface tokenExpirationType {
+  expiresIn: string;
+}
 class TokenHelper {
   constructor() {}
   createToken = (
     data: object,
-    expiresIn: object,
+    expiresIn: tokenExpirationType,
     secreteKey: string
   ): string => {
     return jwt.sign(data, secreteKey, expiresIn);

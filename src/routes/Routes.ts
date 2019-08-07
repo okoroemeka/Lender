@@ -1,6 +1,7 @@
 import * as express from 'express';
 import User from '../controller/User';
 import Loan from '../controller/Loan';
+import ResetPassword from '../controller/ResetPassword';
 import { checkInputFields, checkLoanField } from '../utils/validate';
 import Token from '../utils/tokenHelper';
 
@@ -19,5 +20,6 @@ router.get('/loans', Token.verifyToken, Loan.viewAllLoanApplication);
 router.get('/loans/:id', Token.verifyToken, Loan.getSpecificLoan);
 router.patch('/loans/:id', Token.verifyToken, Loan.reactToLoanApplication);
 router.patch('/users/:user_email/verify', Token.verifyToken, User.verifyUser);
+router.post('/reset-password', ResetPassword.sendResetLink);
 
 export default router;
