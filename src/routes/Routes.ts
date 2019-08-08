@@ -1,7 +1,12 @@
 import * as express from 'express';
 import User from '../controller/User';
 import Loan from '../controller/Loan';
-import { checkInputFields, checkLoanField } from '../utils/validate';
+import ResetPassword from '../controller/ResetPassword';
+import {
+  checkInputFields,
+  checkLoanField,
+  checkPasswordFields
+} from '../utils/validate';
 import Token from '../utils/tokenHelper';
 
 const router = express.Router();
@@ -19,5 +24,12 @@ router.get('/loans', Token.verifyToken, Loan.viewAllLoanApplication);
 router.get('/loans/:id', Token.verifyToken, Loan.getSpecificLoan);
 router.patch('/loans/:id', Token.verifyToken, Loan.reactToLoanApplication);
 router.patch('/users/:user_email/verify', Token.verifyToken, User.verifyUser);
+router.post('/reset-password', ResetPassword.sendResetLink);
+router.patch(
+  '/reset-password/:token',
+  Token.verifyResetPasswordToken,
+  checkPasswordFields,
+  ResetPassword.updatePassword
+);
 
 export default router;

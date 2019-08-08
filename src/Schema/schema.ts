@@ -71,7 +71,9 @@ const userSchema = new Schema({
     default: 'Unverified'
   },
   isAdmin: { type: Boolean, default: false },
-  loans: [{ type: Schema.Types.ObjectId, ref: 'Loan' }]
+  loans: [{ type: Schema.Types.ObjectId, ref: 'Loan' }],
+  passwordResetToken: { type: String }
+  // tokenExpiresIn: { type: Date }
 });
 
 let Loan = mongoose.model('Loan', loansSchema);
