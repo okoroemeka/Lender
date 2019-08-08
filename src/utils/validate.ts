@@ -90,3 +90,39 @@ export const checkLoanField = (
   }
   return next();
 };
+
+export const checkPasswordFields = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { newPassword, confirmNewPassword } = req.body;
+  if (!newPassword || !confirmNewPassword) {
+    return responseHelper(
+      res,
+      400,
+      'Error',
+      'The password fields are required',
+      false
+    );
+  }
+  if (newPassword.trim().length < 1 || confirmNewPassword.trim().length < 1) {
+    return responseHelper(
+      res,
+      400,
+      'Error',
+      'The password fields can not be empty',
+      false
+    );
+  }
+  if (newPassword !== confirmNewPassword) {
+    return responseHelper(
+      res,
+      400,
+      'Error',
+      'The passwords do not match',
+      false
+    );
+  }
+  return next();
+};

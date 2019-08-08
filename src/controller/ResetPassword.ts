@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-// import * as bcrypt from 'bcryptjs';
+import * as jwt from 'jsonwebtoken';
+import * as bcrypt from 'bcryptjs';
 import { User } from '../Schema/schema';
 import responseHelper from '../utils/responseHelper';
 import tokenHelper from '../utils/tokenHelper';
@@ -30,7 +31,7 @@ class ResetPassword {
       const { email: userEmail, _id } = userDetails;
       const token: string = await tokenHelper.createToken(
         { email, id: _id },
-        { expiresIn: '10h' },
+        { expiresIn: '2h' },
         SECRETE_KEY
       );
       await User.findByIdAndUpdate(_id, { passwordResetToken: token });
@@ -42,6 +43,46 @@ class ResetPassword {
         'Success',
         'A password reset link has been sent to your email',
         true
+      );
+    } catch (error) {
+      return responseHelper(
+        res,
+        500,
+        'Error',
+        `${
+          NODE_ENV === 'test' || NODE_ENV === 'dev'
+            ? error.message
+            : 'Internal server error, please try again later'
+        }`,
+        false
+      );
+    }
+  };
+  updatePassword = async (req: Request, res: Response) => {
+    try {
+      const { token } = req.params;
+      const { newPassword, confirmNewPassword } = req.body;
+      const checkToken = await User.findOne({ passwordResetToken: token });
+      if (!checkToken)
+        return responseHelper(
+          res,
+          404,
+          'Error',
+          'You provided an invalid token',
+          false
+        );
+      let hashPassword = await bcrypt.hash(newPassword, 10);
+      const { passwordResetToken }: any = checkToken;
+      await User.findOneAndUpdate(
+        { passwordResetToken },
+        { password: hashPassword }
+      );
+      return responseHelper(
+        res,
+        200,
+        'Success',
+        'password updated successfully, signin to continue',
+        false
       );
     } catch (error) {
       return responseHelper(

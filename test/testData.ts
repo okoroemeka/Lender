@@ -97,5 +97,17 @@ export const testData: any = {
   },
   resetPasswordWrongEmail: {
     email: 'emeka@yahoo.com'
+  },
+  resetPasswordData: {
+    newPassword: 'eretywer1234',
+    confirmNewPassword: 'eretywer1234'
+  },
+  resetPasswordMismatchData: {
+    newPassword: 'eretywer14',
+    confirmNewPassword: 'eretywer1234'
+  },
+  resetPasswordDataEmpty: {
+    newPassword: '',
+    confirmNewPassword: ''
   }
 };
