@@ -2,12 +2,10 @@ import * as request from 'supertest';
 import app from '../src/app';
 import { User } from '../src/Schema/schema';
 import { testData } from './testData';
-import tokenHelper from '../src/utils/tokenHelper';
 
 let appRequest: request.SuperTest<request.Test>;
 let token: string = '';
 let adminToken: string = '';
-// let passwordResetToken: string = '';
 const { WRONG_JWT } = process.env;
 beforeAll(async () => {
   try {
