@@ -1,4 +1,5 @@
 import * as express from 'express';
+import * as passport from 'passport';
 import User from '../controller/User';
 import Loan from '../controller/Loan';
 import ResetPassword from '../controller/ResetPassword';

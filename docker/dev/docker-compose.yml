@@ -1,0 +1,19 @@
+version: '3'
+services:
+  app:
+    container_name: Lender_app
+    restart: always
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      ../../.env
+    ports:
+      - '4220:4220'
+    links:
+      - mongo
+  mongo: 
+    container_name: mongoDB
+    image: mongo
+    ports:
+      - '27017:27017'
