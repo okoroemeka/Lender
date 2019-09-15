@@ -1,22 +1,21 @@
-version: '3'
+version: "3"
 services:
-  mongo: 
+  mongo:
     container_name: mongoDB
     image: mongo
     ports:
-      - '27017:27017'
+      - "27017:27017"
   app:
     container_name: Lender_app
     restart: always
-    build: 
+    build:
       context: .
-      dockerfile: docker/dev/Dockerfile
-    env_file:
-      .env
+      dockerfile: docker/prod/Dockerfile
+    env_file: .env
     ports:
-      - '4220:4220'
+      - "4220:4220"
     expose:
-      - '4220'
+      - "4220"
     links:
       - mongo
     volumes:
@@ -26,12 +25,10 @@ services:
     build:
       context: .
       dockerfile: ./docker/test/Dockerfile
-    env_file:
-      .env
+    env_file: .env
     links:
       - mongo
     container_name: lender_test
 networks:
   lender:
     driver: bridge
-  

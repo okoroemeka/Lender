@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 4220
 
 
-ENTRYPOINT [ "yarn", "watch-ts" ]
+ENTRYPOINT [ "yarn", "start" ]
