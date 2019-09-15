@@ -7,7 +7,7 @@ dotenv.config();
 const {
   TEST_DB,
   DEV_DB,
-  PROD_DB,
+  MONGODB_URI,
   NODE_ENV,
   ADMIN_MAIL,
   ADMIN_FIRSTNAME,
@@ -25,7 +25,7 @@ if (NODE_ENV === 'dev') {
 } else if (NODE_ENV === 'test') {
   uri = TEST_DB;
 } else {
-  uri = PROD_DB;
+  uri = MONGODB_URI;
 }
 mongoose.connect(uri, (error: any) => {
   if (error) console.log(error);
