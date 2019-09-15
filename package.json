@@ -6,10 +6,13 @@
   "author": "okoroemeka <solomonokoro056@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "build-ts": "tsc",
+    "postinstall": "yarn build-ts",
     "watch-ts": "tsc -w",
+    "serve": "node dist/app.js",
     "test": "export NODE_ENV=test && jest -i --forceExit",
     "watch-node": "export NODE_ENV=dev && nodemon dist/app.js",
-    "start": "tsc -d && node dist/app.js"
+    "start": "yarn serve"
   },
   "jest": {
     "preset": "ts-jest",
