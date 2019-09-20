@@ -41,4 +41,5 @@ router.patch(
   validateEditProfile,
   Profile.profileUpdate
 );
+router.get('/edit-profile', Token.verifyToken, Profile.viewProfile);
 export default router;
