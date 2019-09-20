@@ -5,7 +5,7 @@ import responseHelper from '../utils/responseHelper';
 import Token from '../utils/tokenHelper';
 import notify from '../utils/notificationHelper';
 
-const { SECRETE_KEY } = process.env;
+const { SECRETE_KEY, NODE_ENV } = process.env;
 
 /**
  * User authentication
@@ -23,7 +23,7 @@ class UserAuth {
    */
   async userSignup(req: Request, res: Response) {
     try {
-      const { email, password, lastName, firstName, address } = req.body;
+      const { email, password, lastName, firstName } = req.body;
       const checkUser = await User.findOne({
         email: new RegExp(`${email}`, 'gi')
       });
@@ -31,15 +31,16 @@ class UserAuth {
         return responseHelper(res, 409, 'Fail', 'Email already exist', false);
       }
       let hashPassword = await bcrypt.hash(password, 10);
-      const { email: userEmail, isAdmin }: any = await User.create({
-        email,
-        password: hashPassword,
-        lastName,
-        firstName,
-        address
-      });
+      const { email: userEmail, isAdmin, _id: userId }: any = await User.create(
+        {
+          email,
+          password: hashPassword,
+          lastName,
+          firstName
+        }
+      );
       const token = await Token.createToken(
-        { email, isAdmin },
+        { email, isAdmin, userId },
         { expiresIn: '10h' },
         SECRETE_KEY
       );
@@ -55,7 +56,11 @@ class UserAuth {
         res,
         500,
         'Error',
-        'Internal serer error, please try again later',
+        `${
+          NODE_ENV === 'test' || NODE_ENV === 'dev'
+            ? error.message
+            : 'Internal server error, please try again later'
+        }`,
         false
       );
     }
@@ -81,7 +86,12 @@ class UserAuth {
           false
         );
       }
-      const { email: userEmail, password: userPassowrd, isAdmin } = response;
+      const {
+        _id: userId,
+        email: userEmail,
+        password: userPassowrd,
+        isAdmin
+      } = response;
       if (!(await bcrypt.compare(password, userPassowrd))) {
         return responseHelper(
           res,
@@ -96,9 +106,10 @@ class UserAuth {
         200,
         'Success',
         {
+          userId,
           email: userEmail,
           token: Token.createToken(
-            { email, isAdmin },
+            { email, isAdmin, userId },
             { expiresIn: '10h' },
             SECRETE_KEY
           )

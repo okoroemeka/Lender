@@ -6,9 +6,12 @@ import ResetPassword from '../controller/ResetPassword';
 import {
   checkInputFields,
   checkLoanField,
-  checkPasswordFields
+  checkPasswordFields,
+  validateEditProfile
 } from '../utils/validate';
 import Token from '../utils/tokenHelper';
+import Profile from '../controller/Profile';
+// import { validateEditProfile } from 'src/utils/validate';
 
 const router = express.Router();
 
@@ -32,5 +35,10 @@ router.patch(
   checkPasswordFields,
   ResetPassword.updatePassword
 );
-
+router.patch(
+  '/edit-profile',
+  Token.verifyToken,
+  validateEditProfile,
+  Profile.profileUpdate
+);
 export default router;

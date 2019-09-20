@@ -50,7 +50,6 @@ const loansSchema = new Schema({
   monthlyInstallment: { type: Number },
   balance: { type: Number },
   interest: { type: Number }
-  // _debtor: { type: Number, ref: 'User' }
 });
 
 const LoanRepaymentSchema = new Schema({
@@ -64,7 +63,7 @@ const userSchema = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   password: { type: String, required: true },
-  address: { type: String, required: true },
+  address: { type: String, required: false },
   status: {
     type: String,
     enum: ['Verified', 'Unverified'],
@@ -73,7 +72,6 @@ const userSchema = new Schema({
   isAdmin: { type: Boolean, default: false },
   loans: [{ type: Schema.Types.ObjectId, ref: 'Loan' }],
   passwordResetToken: { type: String }
-  // tokenExpiresIn: { type: Date }
 });
 
 let Loan = mongoose.model('Loan', loansSchema);

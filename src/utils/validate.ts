@@ -6,8 +6,13 @@ interface arg {
   firstName: string;
   lastName: string;
   password: string;
-  address: string;
   [key: string]: string;
+}
+interface editProfileArg {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  address?: string;
 }
 /**
  * Validates user inputs.
@@ -24,7 +29,7 @@ export const checkInputFields = (
   const emptyFields: Array<string> = [];
   const fieldRequired: Array<string> =
     req.path === '/auth/signup'
-      ? ['lastName', 'firstName', 'email', 'password', 'address']
+      ? ['lastName', 'firstName', 'email', 'password']
       : ['email', 'password'];
 
   fieldRequired.forEach(field => {
@@ -90,7 +95,12 @@ export const checkLoanField = (
   }
   return next();
 };
-
+/**
+ * Validates Password Fields
+ * @param req
+ * @param res
+ * @param next
+ */
 export const checkPasswordFields = (
   req: Request,
   res: Response,
@@ -124,5 +134,27 @@ export const checkPasswordFields = (
       false
     );
   }
+  return next();
+};
+
+/**
+ * Validates validate Edit Profile info.
+ * @param req
+ * @param res
+ * @param next
+ */
+export const validateEditProfile = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const fildsToModify: Array<string> = Object.keys(req.body);
+  let editProfile: editProfileArg = {};
+  fildsToModify.forEach((field: keyof editProfileArg) => {
+    if (req.body[field].length) {
+      editProfile[field] = req.body[field];
+    }
+  });
+  req.body.editProfile = editProfile;
   return next();
 };

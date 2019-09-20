@@ -109,5 +109,8 @@ export const testData: any = {
   resetPasswordDataEmpty: {
     newPassword: '',
     confirmNewPassword: ''
+  },
+  updateProfile: {
+    firstName: 'okorie'
   }
 };
