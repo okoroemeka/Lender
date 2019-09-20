@@ -65,4 +65,28 @@ describe('Profile test', () => {
     expect(res.status).toBe(404);
     expect(res.body.status).toBe('Error');
   });
+  it('should return 200 for view profile', async () => {
+    const res = await appRequest
+      .get(`/api/v1/edit-profile`)
+      .set('Accept', 'application/json')
+      .set('authorization', token);
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('Success');
+  });
+  it('should return 400 for user who does not exist', async () => {
+    const res = await appRequest
+      .get(`/api/v1/edit-profile`)
+      .set('Accept', 'application/json')
+      .set('authorization', wrongToken);
+    expect(res.status).toBe(400);
+    expect(res.body.status).toBe('Error');
+  });
+  it('should return 404 for non existing user', async () => {
+    const res = await appRequest
+      .get(`/api/v1/edit-profile`)
+      .set('Accept', 'application/json')
+      .set('authorization', nonExitingUserToken);
+    expect(res.status).toBe(404);
+    expect(res.body.status).toBe('Error');
+  });
 });

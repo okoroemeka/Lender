@@ -74,5 +74,41 @@ class Profile {
       );
     }
   };
+  viewProfile = async (req: Request, res: Response, next: NextFunction) => {
+    const {
+      userData: { userId }
+    } = req.body;
+    const profile: any = await User.findById(userId);
+    if (!userId) {
+      return responseHelper(
+        res,
+        400,
+        'Error',
+        'Please log in to continue',
+        false
+      );
+    }
+    if (!profile) {
+      return responseHelper(
+        res,
+        404,
+        'Error',
+        'Please signup to view your profile',
+        false
+      );
+    }
+    return responseHelper(
+      res,
+      200,
+      'Success',
+      {
+        email: profile.email,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        address: profile.address
+      },
+      true
+    );
+  };
 }
 export default new Profile();
