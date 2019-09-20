@@ -12,7 +12,8 @@
     "serve": "node dist/app.js",
     "test": "export NODE_ENV=test && jest -i --forceExit",
     "watch-node": "export NODE_ENV=dev && nodemon dist/app.js",
-    "start": "yarn serve"
+    "start": "yarn serve",
+    "start:dev": "yarn watch-ts -d & yarn watch-node"
   },
   "jest": {
     "preset": "ts-jest",

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 import responseHelper from '../utils/responseHelper';
-const { SECRETE_KEY } = process.env;
+const { SECRETE_KEY, NODE_ENV } = process.env;
 
 export interface tokenExpirationType {
   expiresIn: string;
@@ -30,7 +30,17 @@ class TokenHelper {
       req.body.userData = userData;
       return next();
     } catch (error) {
-      return responseHelper(res, 500, 'Error', error.message, false);
+      return responseHelper(
+        res,
+        500,
+        'Error',
+        `${
+          NODE_ENV === 'test' || NODE_ENV === 'dev'
+            ? error.message
+            : 'Internal server error, please try again later'
+        }`,
+        false
+      );
     }
   };
   verifyResetPasswordToken = (
