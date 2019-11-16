@@ -39,13 +39,30 @@ class Loans {
         amount,
         userData: { email }
       } = req.body;
-      const newAmount: number = parseInt(amount, 10);
-      const newTenor: number = parseInt(tenor, 10);
+      const newAmount: number = Number(amount);
+      const newTenor: number = Number(tenor);
+      const loanDueDate = new Date();
       req.body.balance = 0.05 * newAmount * newTenor + newAmount;
       req.body.email = email;
       req.body.interest = 0.05 * newAmount;
       req.body.monthlyInstallment = newAmount / newTenor + req.body.interest;
-      req.body.createdOn = new Date();
+      req.body.createdOn = Date.now();
+      req.body.dueDate = loanDueDate.setMonth(
+        loanDueDate.getMonth() + newTenor
+      );
+      const check = await Loan.findOne().or([
+        { status: 'pending', email },
+        { email, repaid: false }
+      ]);
+      if (check) {
+        return responseHelper(
+          res,
+          400,
+          'Error',
+          'You have a pending loan request or an unpaid loan',
+          false
+        );
+      }
       const createLoan: any = await Loan.create(req.body);
       return responseHelper(res, 201, 'Success', createLoan, true);
     } catch (error) {

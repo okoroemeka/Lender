@@ -181,6 +181,47 @@ class UserAuth {
       return responseHelper(res, 500, 'Error', error.message, false);
     }
   };
+  getUser = async (req: Request, res: Response) => {
+    try {
+      const {
+        userData: { userId }
+      } = req.body;
+      const user = await User.findById(userId);
+      if (user) {
+        return responseHelper(
+          res,
+          200,
+          'Success',
+          {
+            ...user.toObject({
+              getters: true
+            }),
+            password: ''
+          },
+          true
+        );
+      }
+      return responseHelper(
+        res,
+        404,
+        'Error',
+        'User not found please signup',
+        false
+      );
+    } catch (error) {
+      return responseHelper(
+        res,
+        500,
+        'Error',
+        `${
+          NODE_ENV === 'test' || NODE_ENV === 'dev'
+            ? error.message
+            : 'Internal server error, please try again later'
+        }`,
+        false
+      );
+    }
+  };
 }
 
 export default new UserAuth();

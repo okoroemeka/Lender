@@ -38,7 +38,6 @@ console.log(process.env.NODE_ENV);
 const { Schema } = mongoose;
 const loansSchema = new Schema({
   email: { type: String, ref: 'User', required: true },
-  createdOn: { type: Date, required: true },
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],
@@ -49,7 +48,9 @@ const loansSchema = new Schema({
   amount: { type: Number, required: true },
   monthlyInstallment: { type: Number },
   balance: { type: Number },
-  interest: { type: Number }
+  interest: { type: Number },
+  createdOn: { type: Date, required: true },
+  dueDate: { type: Date, required: true }
 });
 
 const LoanRepaymentSchema = new Schema({
@@ -71,7 +72,8 @@ const userSchema = new Schema({
   },
   isAdmin: { type: Boolean, default: false },
   loans: [{ type: Schema.Types.ObjectId, ref: 'Loan' }],
-  passwordResetToken: { type: String }
+  passwordResetToken: { type: String },
+  isLoggedIn: { type: Boolean }
 });
 
 let Loan = mongoose.model('Loan', loansSchema);
@@ -79,6 +81,8 @@ let User = mongoose.model('User', userSchema);
 let LoanRepayment = mongoose.model('LoanRepayMent', LoanRepaymentSchema);
 
 const createAdmin = async () => {
+  // await Loan.deleteMany({}, error => console.log(error));
+  // await User.deleteMany({}, error => console.log(error));
   const user = await User.findOne({ email: ADMIN_MAIL });
   if (!user) {
     await User.create({

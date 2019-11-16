@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 import * as logger from 'morgan';
+import * as cors from 'cors';
 import router from './routes/Routes';
 
 dotenv.config();
@@ -9,6 +10,11 @@ const { PORT } = process.env;
 const app = express();
 const port: number | string = PORT || 4220;
 
+const corsOption = {
+  origin: 'https://lender-app-react.herokuapp.com/',
+  optionsSuccessStatus: 200
+};
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(logger('dev'));
