@@ -113,4 +113,28 @@ describe('Authentication test', () => {
       );
     });
   });
+  describe('get user', () => {
+    let token: string = '';
+    beforeAll(async () => {
+      try {
+        let user = await appRequest
+          .post('/api/v1/auth/signin')
+          .send(testData.signinUserSuccess)
+          .set('Accept', 'application/json');
+        token = user.body.data.token;
+        console.log('===>>>>', token);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    it('shuold return success for getting a verified user', async () => {
+      const res = await appRequest
+        .get('/api/v1/auth/user')
+        .set('Accept', 'application/json')
+        .set('authorization', token);
+      console.log('===>>>', res.error);
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe('Success');
+    });
+  });
 });

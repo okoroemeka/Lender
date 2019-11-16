@@ -1,7 +1,7 @@
 import * as express from 'express';
-import * as passport from 'passport';
 import User from '../controller/User';
 import Loan from '../controller/Loan';
+import PendingLoan from '../controller/PendingLoan';
 import ResetPassword from '../controller/ResetPassword';
 import {
   checkInputFields,
@@ -11,12 +11,11 @@ import {
 } from '../utils/validate';
 import Token from '../utils/tokenHelper';
 import Profile from '../controller/Profile';
-// import { validateEditProfile } from 'src/utils/validate';
-
 const router = express.Router();
 
 router.post('/auth/signup', checkInputFields, User.userSignup);
 router.post('/auth/signin', checkInputFields, User.signin);
+router.get('/auth/user', Token.verifyToken, User.getUser);
 router.post('/loans', checkLoanField, Token.verifyToken, Loan.createLoan);
 router.post('/loans/:loanId/repayment', Token.verifyToken, Loan.loanRepayment);
 router.get(
@@ -42,4 +41,6 @@ router.patch(
   Profile.profileUpdate
 );
 router.get('/edit-profile', Token.verifyToken, Profile.viewProfile);
+router.get('/pending-loan', Token.verifyToken, PendingLoan.getPendingRequest);
+
 export default router;
