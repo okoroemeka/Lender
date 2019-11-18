@@ -3,6 +3,7 @@ import User from '../controller/User';
 import Loan from '../controller/Loan';
 import PendingLoan from '../controller/PendingLoan';
 import ResetPassword from '../controller/ResetPassword';
+import ApprovedLoan from '../controller/approvedLoan';
 import {
   checkInputFields,
   checkLoanField,
@@ -42,5 +43,10 @@ router.patch(
 );
 router.get('/edit-profile', Token.verifyToken, Profile.viewProfile);
 router.get('/pending-loan', Token.verifyToken, PendingLoan.getPendingRequest);
+router.get(
+  '/approved&unpaid',
+  Token.verifyToken,
+  ApprovedLoan.approvedButUnpaidLoan
+);
 
 export default router;

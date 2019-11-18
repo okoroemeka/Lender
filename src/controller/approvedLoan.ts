@@ -1,24 +1,29 @@
 import { Request, Response } from 'express';
-import { Loan } from '../Schema/schema';
+import { Loan, LoanRepayment } from '../Schema/schema';
 import responseHelper from '../utils/responseHelper';
+import request = require('request');
 
 const { NODE_ENV } = process.env;
 
-class PendingLoan {
+class Approved {
   private Loan: any;
   constructor() {
     this.Loan = Loan;
   }
-  getPendingRequest = async (req: Request, res: Response) => {
+  approvedButUnpaidLoan = async (req: Request, res: Response) => {
     try {
       const {
         userData: { email }
       } = req.body;
-      const loan: Array<object> = await Loan.find({ email, status: 'pending' });
+      const loan: Array<object> = await Loan.find({
+        email,
+        status: 'approved',
+        repaid: false
+      });
       if (loan.length) {
         return responseHelper(res, 200, 'Success', loan, true);
       }
-      return responseHelper(res, 404, 'Fail', 'The loan does not exist', false);
+      return responseHelper(res, 404, 'Error', 'Loan not found', false);
     } catch (error) {
       return responseHelper(
         res,
@@ -35,4 +40,4 @@ class PendingLoan {
   };
 }
 
-export default new PendingLoan();
+export default new Approved();

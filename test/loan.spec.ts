@@ -90,6 +90,22 @@ describe('Loan test', () => {
     expect(typeof res.body.data).toBe('object');
     expect(res.body.data.status).toEqual('approved');
   });
+  it('should return success for viewing an approved but unpaid loan', async () => {
+    const res = await appRequest
+      .get('/api/v1/approved&unpaid')
+      .set('Accept', 'application/json')
+      .set('authorization', token);
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toEqual(1);
+  });
+  it('should return success for viewing an approved but unpaid loan', async () => {
+    const res = await appRequest
+      .get('/api/v1/approved&unpaid')
+      .set('Accept', 'application/json')
+      .set('authorization', adminToken);
+    expect(res.status).toBe(404);
+    expect(res.body.status).toBe('Error');
+  });
   it('should return success for loan rejection by admin', async () => {
     const res = await appRequest
       .patch(`/api/v1/loans/${loanId}`)
