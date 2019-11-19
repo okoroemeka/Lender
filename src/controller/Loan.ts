@@ -52,7 +52,7 @@ class Loans {
       );
       const check = await Loan.findOne().or([
         { status: 'pending', email },
-        { email, repaid: false }
+        { email, repaid: false, status: 'approved' }
       ]);
       if (check) {
         return responseHelper(
