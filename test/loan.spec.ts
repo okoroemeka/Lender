@@ -182,18 +182,18 @@ describe('Loan test', () => {
       'Amount being paid is greater than what is owed'
     );
   });
-  it('Should return Error for loan repayment post by non admin', async () => {
-    const res = await appRequest
-      .post(`/api/v1/loans/${loanId}/repayment`)
-      .send(testData.loanRepaymentOverPay)
-      .set('Accept', 'application/json')
-      .set('authorization', token);
-    expect(res.status).toBe(401);
-    expect(res.body.status).toEqual('Error');
-    expect(res.body.message).toEqual(
-      'You are not authorised to perform this operation'
-    );
-  });
+  // it('Should return Error for loan repayment post by non admin', async () => {
+  //   const res = await appRequest
+  //     .post(`/api/v1/loans/${loanId}/repayment`)
+  //     .send(testData.loanRepaymentOverPay)
+  //     .set('Accept', 'application/json')
+  //     .set('authorization', token);
+  //   expect(res.status).toBe(401);
+  //   expect(res.body.status).toEqual('Error');
+  //   expect(res.body.message).toEqual(
+  //     'You are not authorised to perform this operation'
+  //   );
+  // });
   it('Should return Error for loan that does not exist', async () => {
     const res = await appRequest
       .post(`/api/v1/loans/${'5d3ccc26023096d98d193022'}/repayment`)
