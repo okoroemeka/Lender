@@ -45,7 +45,9 @@ class Loans {
       req.body.balance = 0.05 * newAmount * newTenor + newAmount;
       req.body.email = email;
       req.body.interest = 0.05 * newAmount;
-      req.body.monthlyInstallment = newAmount / newTenor + req.body.interest;
+      req.body.monthlyInstallment = Number.parseFloat(
+        newAmount / newTenor + req.body.interest
+      ).toFixed(2);
       req.body.createdOn = Date.now();
       req.body.dueDate = loanDueDate.setMonth(
         loanDueDate.getMonth() + newTenor
@@ -254,18 +256,18 @@ class Loans {
     try {
       const { loanId: id }: any = req.params;
       const {
-        userData: { isAdmin },
+        // userData: { isAdmin },
         amount: paidAmount
       }: any = req.body;
-      if (!isAdmin) {
-        return responseHelper(
-          res,
-          401,
-          'Error',
-          'You are not authorised to perform this operation',
-          false
-        );
-      }
+      // if (!isAdmin) {
+      //   return responseHelper(
+      //     res,
+      //     401,
+      //     'Error',
+      //     'You are not authorised to perform this operation',
+      //     false
+      //   );
+      // }
       const loan: any = await Loan.findById(id);
       if (!loan) {
         return responseHelper(res, 404, 'Error', 'loan not found', false);
