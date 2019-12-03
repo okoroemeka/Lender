@@ -142,6 +142,7 @@ class Loans {
         responsePackage.responseType
       );
     } catch (error) {
+      console.log('i got here');
       return responseHelper(res, 500, 'Error', error.message, false);
     }
   };
@@ -243,6 +244,7 @@ class Loans {
       );
       return responseHelper(res, 200, 'Success', loan, true);
     } catch (error) {
+      console.log('===>> LoanReaction');
       return responseHelper(res, 500, 'Error', error.message, false);
     }
   };
