@@ -12,9 +12,11 @@ class PendingLoan {
   getPendingRequest = async (req: Request, res: Response) => {
     try {
       const {
-        userData: { email }
+        userData: { email, isAdmin }
       } = req.body;
-      const loan: Array<object> = await Loan.find({ email, status: 'pending' });
+      const loan: Array<object> = await Loan.find(
+        isAdmin ? { status: 'pending' } : { email, status: 'pending' }
+      );
       if (loan.length) {
         return responseHelper(res, 200, 'Success', loan, true);
       }
