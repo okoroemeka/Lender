@@ -184,9 +184,10 @@ class UserAuth {
   getUser = async (req: Request, res: Response) => {
     try {
       const {
-        userData: { userId }
+        userData: { userId, email }
       } = req.body;
-      const user = await User.findById(userId);
+      const user = await User.findById(userId).cache({ key: email });
+
       if (user) {
         return responseHelper(
           res,

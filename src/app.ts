@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import * as logger from 'morgan';
 import * as cors from 'cors';
 import router from './routes/Routes';
+import './services/cache';
 
 dotenv.config();
 const { PORT } = process.env;
