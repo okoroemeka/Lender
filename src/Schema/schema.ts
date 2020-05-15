@@ -21,7 +21,7 @@ const {
 let uri: string = '';
 
 if (NODE_ENV === 'dev') {
-  uri = DEV_DB;
+  uri = MONGODB_URI;
 } else if (NODE_ENV === 'test') {
   uri = TEST_DB;
 } else {

@@ -10,10 +10,6 @@ const { PORT } = process.env;
 const app = express();
 const port: number | string = PORT || 4220;
 
-const corsOption = {
-  origin: 'https://lender-app-react.herokuapp.com/',
-  optionsSuccessStatus: 200
-};
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
